@@ -1,8 +1,23 @@
-﻿@{
+﻿@model IEnumerable<Blog.Models.Article>
+
+@{
     ViewData["Title"] = "Home Page";
 }
 
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
+    <h1 class="display-4">Welcome to my small Blog!</h1>
     <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
 </div>
+
+@foreach (var item in Model) {
+    <a asp-controller="Articles" asp-action="Details" asp-route-id="@item.Id" class="text-decoration-none text-reset">
+        <div class="card mb-2">
+            <div class="card-header h4">
+                @Html.DisplayFor(modelItem => item.Title)
+                <div class="h6" style="color: gray">
+                    @Html.DisplayFor(modelItem => item.Date)
+                </div>
+            </div>
+        </div>
+    </a>
+}

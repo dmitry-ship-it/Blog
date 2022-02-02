@@ -1,0 +1,29 @@
+﻿@model IEnumerable<Blog.Models.Article>
+
+@{
+    ViewData["Title"] = "Articles";
+}
+
+<h1>Articles</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+
+@foreach (var item in Model) {
+    <div class="card mb-5">
+        <div class="card-header h5">@Html.DisplayFor(modelItem => item.Title)</div>
+        <div class="card-body">
+            <div class="card-text">
+                @Html.DisplayFor(modelItem => item.Text)
+            </div>
+            <div class="card-text text-right" style="color: gray">
+                @Html.DisplayFor(modelItem => item.Date)
+            </div>
+            <div class="card-text">
+                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+            </div>
+        </div>
+    </div>
+}

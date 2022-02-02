@@ -1,0 +1,26 @@
+﻿@model Blog.Models.Article
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<div>
+    <br />
+    <h4 style="text-align: center">@Model.Title</h4>
+    <hr />
+    <dl class="col">
+        <dd class="row">
+            @Html.DisplayFor(model => model.Text)
+        </dd>
+        <dd class="text-right" style="color: gray">
+            @Html.DisplayFor(model => model.Date)
+        </dd>
+    </dl>
+</div>
+<div>
+    @if (User.Identity.IsAuthenticated)
+    {
+        <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a>
+    }
+    <a asp-action="Index">Go to full list</a>
+</div>
