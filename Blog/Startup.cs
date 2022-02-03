@@ -31,19 +31,21 @@ namespace Blog
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection")));
             services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+                .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
-            // TODO: Add authorization https://docs.microsoft.com/en-us/aspnet/core/security/authorization/roles?view=aspnetcore-5.0
-            /* services.AddDefaultIdentity<IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
-                .AddRoles<IdentityRole>()
-                .AddEntityFrameworkStores<ApplicationDbContext>(); */
+            //services.AddAuthorization(options =>
+            //{
+            //    options.AddPolicy("RequireAdministratorRole",
+            //        policy => policy.RequireRole("Administrator"));
+            //});
 
             services.AddControllersWithViews();
             services.AddRazorPages();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider serviceProvider)
         {
             if (env.IsDevelopment())
             {
@@ -52,7 +54,7 @@ namespace Blog
             }
             else
             {
-                app.UseExceptionHandler("/Home/Error");
+                app.UseExceptionHandler("/Error");
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
@@ -71,6 +73,57 @@ namespace Blog
                     pattern: "{controller=Home}/{action=Index}/{id?}");
                 endpoints.MapRazorPages();
             });
+
+            CreateRoles(serviceProvider);
+        }
+
+        private void CreateRoles(IServiceProvider serviceProvider)
+        {
+            var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+            var userManager = serviceProvider.GetRequiredService<UserManager<IdentityUser>>();
+            Task<IdentityResult> roleResult;
+
+            //Check for roles
+            var roles = new string[] { "Administrator", "User" };
+
+            foreach (var role in roles)
+            {
+                var roleExists = roleManager.RoleExistsAsync(role);
+                roleExists.Wait();
+
+                if (!roleExists.Result)
+                {
+                    roleResult = roleManager.CreateAsync(new IdentityRole(role));
+                    roleResult.Wait();
+                }
+            }
+
+            // Add default admin
+            // to the Administrator role
+            const string userName = "John_Doe";
+            const string email = "someone@somewhere.com";
+            const string password = "_AStrongP@ssword1!";
+
+            var testUser = userManager.FindByEmailAsync(email);
+            testUser.Wait();
+
+            if (testUser.Result == null)
+            {
+                var defaultAdmin = new IdentityUser
+                {
+                    UserName = userName,
+                    Email = email
+                };
+
+                var newUser = userManager.CreateAsync(defaultAdmin, password);
+                newUser.Wait();
+
+                if (newUser.Result.Succeeded)
+                {
+                    var newUserRole = userManager.AddToRoleAsync(defaultAdmin, "Administrator");
+                    newUserRole.Wait();
+                }
+            }
         }
     }
 }

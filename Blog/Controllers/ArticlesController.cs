@@ -21,14 +21,12 @@ namespace Blog.Controllers
         }
 
         // GET: Articles
-        [Route("articles")]
         public async Task<IActionResult> Index()
         {
             return View(await _context.Article.ToListAsync());
         }
 
         // GET: Articles/Details/5
-        [Route("articles/details")]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -38,6 +36,7 @@ namespace Blog.Controllers
 
             var article = await _context.Article
                 .FirstOrDefaultAsync(m => m.Id == id);
+
             if (article == null)
             {
                 return NotFound();
@@ -47,8 +46,6 @@ namespace Blog.Controllers
         }
 
         // GET: Articles/Create
-        [Authorize]
-        [Route("articles/create")]
         public IActionResult Create()
         {
             return View();
@@ -73,7 +70,6 @@ namespace Blog.Controllers
         }
 
         // GET: Articles/Edit/5
-        [Route("articles/edit")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -82,10 +78,12 @@ namespace Blog.Controllers
             }
 
             var article = await _context.Article.FindAsync(id);
+
             if (article == null)
             {
                 return NotFound();
             }
+
             return View(article);
         }
 
@@ -96,7 +94,7 @@ namespace Blog.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Text,Date")] Article article)
         {
-            if (id != article.Id)
+            if (id != article?.Id)
             {
                 return NotFound();
             }
@@ -108,34 +106,28 @@ namespace Blog.Controllers
                     _context.Update(article);
                     await _context.SaveChangesAsync();
                 }
-                catch (DbUpdateConcurrencyException)
+                catch (DbUpdateConcurrencyException) when (!ArticleExists(article.Id))
                 {
-                    if (!ArticleExists(article.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    return NotFound();
                 }
+
                 return RedirectToAction(nameof(Index));
             }
+
             return View(article);
         }
 
         // GET: Articles/Delete/5
-        [Route("articles/delete")]
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
+            if (id is null)
             {
                 return NotFound();
             }
 
             var article = await _context.Article
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (article == null)
+            if (article is null)
             {
                 return NotFound();
             }

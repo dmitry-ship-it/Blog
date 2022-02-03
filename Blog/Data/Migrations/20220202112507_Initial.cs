@@ -6,12 +6,12 @@ namespace Blog.Data.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-
+            // no changes
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-
+            // no changes
         }
     }
 }
