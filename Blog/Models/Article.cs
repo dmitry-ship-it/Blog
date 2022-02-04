@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace Blog.Models
 {
     public class Article
     {
+        [Key]
         [Required]
         public int Id { get; set; }
 
@@ -17,9 +19,6 @@ namespace Blog.Models
         [Required]
         public DateTime Date { get; set; }
 
-        public Article()
-        {
-
-        }
+        public virtual ICollection<Comment> Comments { get; set; }
     }
 }

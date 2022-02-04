@@ -13,6 +13,13 @@ namespace Blog.Data
             : base(options)
         {
         }
-        public DbSet<Blog.Models.Article> Article { get; set; }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.UseLazyLoadingProxies();
+        }
+
+        public DbSet<Article> Article { get; set; }
+        public DbSet<Comment> Comment { get; set; }
     }
 }

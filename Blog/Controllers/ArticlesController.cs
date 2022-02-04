@@ -127,6 +127,7 @@ namespace Blog.Controllers
 
             var article = await _context.Article
                 .FirstOrDefaultAsync(m => m.Id == id);
+
             if (article is null)
             {
                 return NotFound();
@@ -144,6 +145,33 @@ namespace Blog.Controllers
             _context.Article.Remove(article);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
+        }
+
+        // POST: Articles/AddComment
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddComment([Bind("Id,Username,Text,DateCreated,ArticleId,Article")] Comment comment)
+        {
+            if (!string.IsNullOrWhiteSpace(comment!.Text))
+            {
+                _context.Comment.Add(comment);
+                await _context.SaveChangesAsync();
+            }
+
+            return RedirectToAction("Details", new { id = comment!.ArticleId });
+        }
+
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteComment(Guid id)
+        {
+            var comment = await _context.Comment.FindAsync(id);
+            _context.Comment.Remove(comment);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Details", new { id = comment.ArticleId });
         }
 
         private bool ArticleExists(int id)

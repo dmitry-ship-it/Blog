@@ -43,7 +43,7 @@ namespace Blog.Areas.Identity.Pages.Account
         public class InputModel
         {
             [Required]
-            [StringLength(15, MinimumLength = 3)]
+            [StringLength(256, MinimumLength = 3)]
             public string Username { get; set; }
 
             [Required]
@@ -79,7 +79,19 @@ namespace Blog.Areas.Identity.Pages.Account
             {
                 // This doesn't count login failures towards account lockout
                 // To enable password failures to trigger account lockout, set lockoutOnFailure: true
+
+                // If the user entered email instead of login 
+                if (new EmailAddressAttribute().IsValid(Input.Username))
+                {
+                    var userSearchResult = await _userManager.FindByEmailAsync(Input.Username);
+                    if (userSearchResult != null)
+                    {
+                        Input.Username = userSearchResult.UserName;
+                    }
+                }
+                
                 var result = await _signInManager.PasswordSignInAsync(Input.Username, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+                
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User logged in.");

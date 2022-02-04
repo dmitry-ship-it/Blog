@@ -28,14 +28,11 @@ namespace Blog.Controllers
             return View(await _context.Article.ToListAsync());
         }
 
-        [Route("privacy")]
         public IActionResult Privacy()
         {
             return View();
         }
 
-        [Route("error")]
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
