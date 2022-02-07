@@ -1,0 +1,21 @@
+﻿@model Blog.Models.Comment
+@{
+    var article = ViewData["Article"] as Article;
+    var commentId = (int?)ViewData["OusideCommentId"];
+}
+
+<form asp-action="AddComment">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <input type="hidden" asp-for="Username" value=@User.Identity.Name />
+    <input type="hidden" asp-for="DateCreated" value=@DateTime.Now />
+    <input type="hidden" asp-for="ArticleId" value=@article.Id />
+    <input type="hidden" asp-for="Article" value=@article />
+    <input type="hidden" asp-for="CommentId" value=@commentId />
+
+    <div class="form-group mb-0 d-flex">
+        <input asp-for="Text" type="text" placeholder="Leave a comment" class="text-body form-control w-50" />
+        <span asp-validation-for="Text" class="text-danger"></span>   
+        <input type="submit" value="Send" class="btn btn-primary" />
+    </div>
+</form>

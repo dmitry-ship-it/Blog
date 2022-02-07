@@ -6,14 +6,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Data\Migrations\20220203061444_Roles.cs" />
-    <Compile Remove="Data\Migrations\20220203061444_Roles.Designer.cs" />
-    <Compile Remove="Data\Migrations\20220203143412_Test.cs" />
-    <Compile Remove="Data\Migrations\20220203143412_Test.Designer.cs" />
-    <Compile Remove="Data\Migrations\20220203152449_CommentsModification1.cs" />
-    <Compile Remove="Data\Migrations\20220203152449_CommentsModification1.Designer.cs" />
-    <Compile Remove="Data\Migrations\20220203152542_CommentsModification1.cs" />
-    <Compile Remove="Data\Migrations\20220203152542_CommentsModification1.Designer.cs" />
+    <Compile Remove="Migrations\20220207130009_CommentsAddFix.cs" />
+    <Compile Remove="Migrations\20220207130009_CommentsAddFix.Designer.cs" />
+    <Compile Remove="Migrations\20220207130444_CommentsAddFix.cs" />
+    <Compile Remove="Migrations\20220207130444_CommentsAddFix.Designer.cs" />
+    <Compile Remove="Migrations\20220207130730_DbUpdate.cs" />
+    <Compile Remove="Migrations\20220207130730_DbUpdate.Designer.cs" />
+    <Compile Remove="Migrations\20220207131512_DbUpdate.cs" />
+    <Compile Remove="Migrations\20220207131512_DbUpdate.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>

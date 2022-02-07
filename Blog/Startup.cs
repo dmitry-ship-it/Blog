@@ -1,16 +1,13 @@
 using Blog.Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace Blog
@@ -27,18 +24,16 @@ namespace Blog
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var dbPath = Directory.GetCurrentDirectory();
+
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
-                    Configuration.GetConnectionString("DefaultConnection")));
+                    Configuration.GetConnectionString("DefaultConnection")
+                        .Replace("[DataDirectory]", dbPath)));
+
             services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
-
-            //services.AddAuthorization(options =>
-            //{
-            //    options.AddPolicy("RequireAdministratorRole",
-            //        policy => policy.RequireRole("Administrator"));
-            //});
 
             services.AddControllersWithViews();
             services.AddRazorPages();
@@ -83,7 +78,7 @@ namespace Blog
             var userManager = serviceProvider.GetRequiredService<UserManager<IdentityUser>>();
             Task<IdentityResult> roleResult;
 
-            //Check for roles
+            //Check if roles exist
             var roles = new string[] { "Administrator", "User" };
 
             foreach (var role in roles)

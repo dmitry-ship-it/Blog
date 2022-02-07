@@ -7,7 +7,7 @@
     }
     else
     {
-        @foreach (var comment in Model)
+        @foreach (var comment in Model.Where(comm => comm.CommentId == null).OrderBy(item => item.DateCreated))
         {
             <div class="card mb-2">
                 <div class="card-header d-flex">
@@ -22,6 +22,16 @@
                 <div class="card-body">
                     <div class="card-text">@comment.Text</div>
                     <div class="text-right card-text" style="color: gray">@comment.DateCreated</div>
+                    @if (comment.Replies != null && comment.Replies.Count > 0)
+                    {
+                        ViewData["OusideCommentId"] = comment.Id;
+                        <partial name="_ReplyPartial" model=@comment.Replies view-data="ViewData" />
+                        ViewData["OusideCommentId"] = null;
+                    }
+                    <div class="card-text">
+                        @{ ViewData["OusideCommentId"] = comment.Id; }
+                        <partial name="_AddCommentPartial" model="new Comment()" view-data="ViewData" />
+                    </div>
                 </div>
             </div>
         }

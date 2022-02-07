@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-namespace Blog.Data.Migrations
+namespace Blog.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     partial class ApplicationDbContextModelSnapshot : ModelSnapshot
@@ -44,11 +44,15 @@ namespace Blog.Data.Migrations
 
             modelBuilder.Entity("Blog.Models.Comment", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<int>("ArticleId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("CommentId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("DateCreated")
@@ -65,6 +69,8 @@ namespace Blog.Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ArticleId");
+
+                    b.HasIndex("CommentId");
 
                     b.ToTable("Comment");
                 });
@@ -271,11 +277,15 @@ namespace Blog.Data.Migrations
 
             modelBuilder.Entity("Blog.Models.Comment", b =>
                 {
-                    b.HasOne("Blog.Models.Article", null)
+                    b.HasOne("Blog.Models.Article", "Article")
                         .WithMany("Comments")
                         .HasForeignKey("ArticleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("Blog.Models.Comment", null)
+                        .WithMany("Replies")
+                        .HasForeignKey("CommentId");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

@@ -1,12 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Blog.Models
 {
     public class Comment
     {
+        [Key]
         [Required]
-        public Guid Id { get; set; }
+        public int Id { get; set; }
 
         [Required]
         public string Username { get; set; }
@@ -19,6 +22,10 @@ namespace Blog.Models
 
         [Required]
         public int ArticleId { get; set; }
+
+        public int? CommentId { get; set; }
+
+        public virtual ICollection<Comment> Replies { get; set; }
 
         public virtual Article Article { get; set; }
     }

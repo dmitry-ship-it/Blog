@@ -151,7 +151,7 @@ namespace Blog.Controllers
         [HttpPost]
         [Authorize]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddComment([Bind("Id,Username,Text,DateCreated,ArticleId,Article")] Comment comment)
+        public async Task<IActionResult> AddComment([Bind("Id,Username,Text,DateCreated,Article,ArticleId,CommentId")] Comment comment)
         {
             if (!string.IsNullOrWhiteSpace(comment!.Text))
             {
@@ -165,7 +165,7 @@ namespace Blog.Controllers
         [HttpPost]
         [Authorize]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteComment(Guid id)
+        public async Task<IActionResult> DeleteComment(int id)
         {
             var comment = await _context.Comment.FindAsync(id);
             _context.Comment.Remove(comment);
