@@ -46,6 +46,7 @@ namespace Blog.Controllers
         }
 
         // GET: Articles/Create
+        [Authorize(Roles = "Administrator")]
         public IActionResult Create()
         {
             return View();
@@ -56,6 +57,7 @@ namespace Blog.Controllers
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> Create([Bind("Id,Title,Text,Date")] Article article)
         {
             if (ModelState.IsValid)
@@ -70,6 +72,7 @@ namespace Blog.Controllers
         }
 
         // GET: Articles/Edit/5
+        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -92,6 +95,7 @@ namespace Blog.Controllers
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Text,Date")] Article article)
         {
             if (id != article?.Id)
@@ -118,6 +122,7 @@ namespace Blog.Controllers
         }
 
         // GET: Articles/Delete/5
+        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id is null)
@@ -139,6 +144,7 @@ namespace Blog.Controllers
         // POST: Articles/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var article = await _context.Article.FindAsync(id);
@@ -153,7 +159,7 @@ namespace Blog.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddComment([Bind("Id,Username,Text,DateCreated,Article,ArticleId,CommentId")] Comment comment)
         {
-            if (!string.IsNullOrWhiteSpace(comment!.Text))
+            if (ModelState.IsValid)
             {
                 _context.Comment.Add(comment);
                 await _context.SaveChangesAsync();
@@ -162,16 +168,31 @@ namespace Blog.Controllers
             return RedirectToAction("Details", new { id = comment!.ArticleId });
         }
 
+        // POST: Articles/DeleteComment
         [HttpPost]
         [Authorize]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteComment(int id)
         {
             var comment = await _context.Comment.FindAsync(id);
-            _context.Comment.Remove(comment);
+
+            RemoveCommentAndRepliesRecursive(comment);
             await _context.SaveChangesAsync();
 
             return RedirectToAction("Details", new { id = comment.ArticleId });
+        }
+
+        private void RemoveCommentAndRepliesRecursive(Comment comment)
+        {
+            if (comment.Replies.Count != 0)
+            {
+                foreach (var reply in comment.Replies)
+                {
+                    RemoveCommentAndRepliesRecursive(reply);
+                }
+            }
+
+            _context.Comment.Remove(comment);
         }
 
         private bool ArticleExists(int id)

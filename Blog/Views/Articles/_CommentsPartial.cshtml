@@ -26,7 +26,6 @@
                     {
                         ViewData["OusideCommentId"] = comment.Id;
                         <partial name="_ReplyPartial" model=@comment.Replies view-data="ViewData" />
-                        ViewData["OusideCommentId"] = null;
                     }
                     <div class="card-text">
                         @{ ViewData["OusideCommentId"] = comment.Id; }

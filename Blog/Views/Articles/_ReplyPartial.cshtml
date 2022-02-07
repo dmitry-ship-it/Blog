@@ -5,31 +5,32 @@
 
 @foreach (var comment in Model.OrderBy(item => item.DateCreated))
 {
-        <div class="card mb-2">
-            <div class="card-header d-flex">
-                <div>
-                    @comment.Username
-                </div>
-                @if (User.IsInRole("Administrator") || User.Identity.Name == comment.Username)
-                {
-                    <partial name="_DeleteCommentPartial" model="comment" />
-                }
+    <div class="card mb-2">
+        <div class="card-header d-flex">
+            <div>
+                @comment.Username
             </div>
-            <div class="card-body">
-                <div class="card-text">@comment.Text</div>
-                <div class="text-right card-text" style="color: gray">@comment.DateCreated</div>
-                @if (comment.Replies != null && comment.Replies.Count > 0)
-                {
-                    ViewData["OusideCommentId"] = comment.Id;
-                    <partial name="_ReplyPartial" model=@comment.Replies view-data="ViewData" />
-                    ViewData["OusideCommentId"] = null;
-                }
-                <div class="card-text">
-                    @{
-                        ViewData["CommentId"] = comment.Id;
-                    }
-                    <partial name="_AddCommentPartial" model="new Comment()" view-data="ViewData" />
-                </div>
+            @if (User.IsInRole("Administrator") || User.Identity.Name == comment.Username)
+            {
+                <partial name="_DeleteCommentPartial" model="comment" />
+            }
+        </div>
+        <div class="card-body">
+            <div class="card-text">@comment.Text</div>
+            <div class="text-right card-text" style="color: gray">@comment.DateCreated</div>
+            @if (comment.Replies != null && comment.Replies.Count > 0)
+            {
+                ViewData["OusideCommentId"] = comment.Id;
+                <partial name="_ReplyPartial" model=@comment.Replies view-data="ViewData" />
+            }
+            <div class="card-text">
+                @{ ViewData["OusideCommentId"] = comment.Id; }
+                <partial name="_AddCommentPartial" model="new Comment()" view-data="ViewData" />
             </div>
         </div>
+    </div>
+}
+
+@{
+    ViewData["OusideCommentId"] = null;
 }
