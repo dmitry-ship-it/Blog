@@ -15,12 +15,9 @@ namespace Blog.Controllers
     {
         private readonly ApplicationDbContext _context;
 
-        private readonly ILogger<HomeController> _logger;
-
-        public HomeController(ApplicationDbContext context, ILogger<HomeController> logger)
+        public HomeController(ApplicationDbContext context)
         {
             _context = context;
-            _logger = logger;
         }
 
         public async Task<IActionResult> Index()

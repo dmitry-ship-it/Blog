@@ -23,10 +23,10 @@ namespace Blog.Models
         [Required]
         public int ArticleId { get; set; }
 
+        // Outside comment id (if comment is reply to other comment)
+        // add-migration generates this column in db to handle ICollection<Comment> Replies
         public int? CommentId { get; set; }
 
         public virtual ICollection<Comment> Replies { get; set; }
-
-        public virtual Article Article { get; set; }
     }
 }

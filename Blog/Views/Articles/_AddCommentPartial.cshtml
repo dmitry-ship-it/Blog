@@ -9,8 +9,7 @@
 
     <input type="hidden" asp-for="Username" value=@User.Identity.Name />
     <input type="hidden" asp-for="DateCreated" value=@DateTime.Now />
-    <input type="hidden" asp-for="ArticleId" value=@article.Id />
-    <input type="hidden" asp-for="Article" value=@article />
+    <input type="hidden" asp-for="ArticleId" value=@article?.Id />
     <input type="hidden" asp-for="CommentId" value=@commentId />
 
     <div class="form-group mb-0 d-flex">

@@ -174,7 +174,7 @@ namespace Blog.Controllers
         [HttpPost]
         [Authorize]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddComment([Bind("Id,Username,Text,DateCreated,Article,ArticleId,CommentId")] Comment comment)
+        public async Task<IActionResult> AddComment([Bind("Id,Username,Text,DateCreated,ArticleId,CommentId")] Comment comment)
         {
             if (ModelState.IsValid)
             {
@@ -198,12 +198,16 @@ namespace Blog.Controllers
         public async Task<IActionResult> DeleteComment(int id)
         {
             var comment = await _context.Comment.FindAsync(id);
-            var repliesCount = comment.Replies.Count;
+
+            if (comment is null)
+            {
+                return NotFound();
+            }
 
             RemoveCommentAndRepliesRecursive(comment);
             await _context.SaveChangesAsync();
 
-            _logger.LogInformation($"Comment (id = {comment.Id}) and its replies({repliesCount}) deleted.");
+            _logger.LogInformation($"Comment (id = {comment.Id}) and its replies deleted.");
 
             return RedirectToAction("Details", new { id = comment.ArticleId });
         }
