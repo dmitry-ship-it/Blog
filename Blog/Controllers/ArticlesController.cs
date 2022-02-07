@@ -8,16 +8,19 @@ using Microsoft.EntityFrameworkCore;
 using Blog.Data;
 using Blog.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Logging;
 
 namespace Blog.Controllers
 {
     public class ArticlesController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly ILogger<HomeController> _logger;
 
-        public ArticlesController(ApplicationDbContext context)
+        public ArticlesController(ApplicationDbContext context, ILogger<HomeController> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         // GET: Articles
@@ -65,8 +68,13 @@ namespace Blog.Controllers
                 article.Date = DateTime.Now;
                 _context.Add(article);
                 await _context.SaveChangesAsync();
+
+                _logger.LogInformation($"Article (id = {article.Id}) is created.");
+
                 return RedirectToAction(nameof(Index));
             }
+
+            _logger.LogWarning($"Article (id = {article.Id}) is not created.");
 
             return View(article);
         }
@@ -112,11 +120,17 @@ namespace Blog.Controllers
                 }
                 catch (DbUpdateConcurrencyException) when (!ArticleExists(article.Id))
                 {
+                    _logger.LogWarning($"Article (id = {article.Id}) is not changed (not found).");
+
                     return NotFound();
                 }
 
+                _logger.LogInformation($"Article (id = {article.Id}) is changed.");
+
                 return RedirectToAction(nameof(Index));
             }
+
+            _logger.LogWarning($"Article (id = {article.Id}) is not changed (model state invalid).");
 
             return View(article);
         }
@@ -150,6 +164,9 @@ namespace Blog.Controllers
             var article = await _context.Article.FindAsync(id);
             _context.Article.Remove(article);
             await _context.SaveChangesAsync();
+
+            _logger.LogInformation($"Article (id = {article.Id}) deleted.");
+
             return RedirectToAction(nameof(Index));
         }
 
@@ -163,6 +180,12 @@ namespace Blog.Controllers
             {
                 _context.Comment.Add(comment);
                 await _context.SaveChangesAsync();
+
+                _logger.LogInformation($"Comment (id = {comment.Id}) added.");
+            }
+            else
+            {
+                _logger.LogInformation($"Comment (id = {comment.Id}) is not added (model state is invalid).");
             }
 
             return RedirectToAction("Details", new { id = comment!.ArticleId });
@@ -175,9 +198,12 @@ namespace Blog.Controllers
         public async Task<IActionResult> DeleteComment(int id)
         {
             var comment = await _context.Comment.FindAsync(id);
+            var repliesCount = comment.Replies.Count;
 
             RemoveCommentAndRepliesRecursive(comment);
             await _context.SaveChangesAsync();
+
+            _logger.LogInformation($"Comment (id = {comment.Id}) and its replies({repliesCount}) deleted.");
 
             return RedirectToAction("Details", new { id = comment.ArticleId });
         }

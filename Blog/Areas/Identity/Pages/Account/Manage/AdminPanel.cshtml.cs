@@ -1,4 +1,5 @@
 using Blog.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -9,6 +10,7 @@ using System.Threading.Tasks;
 
 namespace Blog.Areas.Identity.Pages.Account.Manage
 {
+    [Authorize(Roles = "Administrator")]
     public class AdminPanelModel : PageModel
     {
         private readonly UserManager<IdentityUser> _userManager;
@@ -42,7 +44,6 @@ namespace Blog.Areas.Identity.Pages.Account.Manage
             [Display(Name = "Choose a new role")]
             public string NewRole { get; set; }
         }
-
 
         public async Task<IActionResult> OnPostAsync()
         {
