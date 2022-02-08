@@ -46,7 +46,7 @@ namespace Blog.Areas.Identity.Pages.Account
         public class InputModel
         {
             [Required]
-            [StringLength(20, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 3)]
+            [StringLength(15, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 3)]
             [DataType(DataType.Text)]
             [Display(Name = "Login")]
             public string Login { get; set; }

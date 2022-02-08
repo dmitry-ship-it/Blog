@@ -21,7 +21,7 @@ namespace Blog.Areas.Identity.Pages.Account
         private readonly SignInManager<IdentityUser> _signInManager;
         private readonly ILogger<LoginModel> _logger;
 
-        public LoginModel(SignInManager<IdentityUser> signInManager, 
+        public LoginModel(SignInManager<IdentityUser> signInManager,
             ILogger<LoginModel> logger,
             UserManager<IdentityUser> userManager)
         {
@@ -42,8 +42,9 @@ namespace Blog.Areas.Identity.Pages.Account
 
         public class InputModel
         {
+            // also can store user's email to login using it
             [Required]
-            [StringLength(256, MinimumLength = 3)]
+            [StringLength(320, MinimumLength = 3)]
             public string Username { get; set; }
 
             [Required]
@@ -89,9 +90,9 @@ namespace Blog.Areas.Identity.Pages.Account
                         Input.Username = userSearchResult.UserName;
                     }
                 }
-                
+
                 var result = await _signInManager.PasswordSignInAsync(Input.Username, Input.Password, Input.RememberMe, lockoutOnFailure: false);
-                
+
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User logged in.");

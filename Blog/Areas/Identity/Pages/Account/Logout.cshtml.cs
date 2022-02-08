@@ -24,6 +24,7 @@ namespace Blog.Areas.Identity.Pages.Account
 
         public void OnGet()
         {
+            // do nothing
         }
 
         public async Task<IActionResult> OnPost(string returnUrl = null)

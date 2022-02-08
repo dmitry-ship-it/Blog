@@ -36,7 +36,7 @@ namespace Blog.Areas.Identity.Pages.Account.Manage
         public class InputModel
         {
             [Required]
-            [StringLength(256, MinimumLength = 3)]
+            [StringLength(320, MinimumLength = 3)]
             [Display(Name = "Username")]
             public string Username { get; set; }
 

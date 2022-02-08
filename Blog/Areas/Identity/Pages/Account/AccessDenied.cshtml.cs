@@ -10,8 +10,7 @@ namespace Blog.Areas.Identity.Pages.Account
     {
         public void OnGet()
         {
-
+            // this page just displays message
         }
     }
 }
-
