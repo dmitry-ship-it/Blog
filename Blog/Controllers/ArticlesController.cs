@@ -117,7 +117,7 @@ namespace Blog.Controllers
             {
                 try
                 {
-                    await _articleRepository.UpdateAsync(article);
+                    _articleRepository.Update(article);
                     await _articleRepository.SaveAsync();
                 }
                 catch (DbUpdateConcurrencyException) when (!ArticleExists(article.Id))
@@ -227,7 +227,7 @@ namespace Blog.Controllers
 
         private bool ArticleExists(int id)
         {
-            return _articleRepository.GetById(id) != null;
+            return _articleRepository.GetByIdAsync(id) != null;
         }
     }
 }

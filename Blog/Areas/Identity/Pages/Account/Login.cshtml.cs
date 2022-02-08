@@ -42,7 +42,7 @@ namespace Blog.Areas.Identity.Pages.Account
 
         public class InputModel
         {
-            // also can store user's email to login using it
+            // also can store user's email to log in using it
             [Required]
             [StringLength(320, MinimumLength = 3)]
             public string Username { get; set; }
@@ -97,10 +97,6 @@ namespace Blog.Areas.Identity.Pages.Account
                 {
                     _logger.LogInformation("User logged in.");
                     return LocalRedirect(returnUrl);
-                }
-                if (result.RequiresTwoFactor)
-                {
-                    return RedirectToPage("./LoginWith2fa", new { ReturnUrl = returnUrl, RememberMe = Input.RememberMe });
                 }
                 if (result.IsLockedOut)
                 {
