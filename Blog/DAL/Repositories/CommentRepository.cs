@@ -23,9 +23,9 @@ namespace Blog.DAL.Repositories
             return await _context.Comment.ToListAsync();
         }
 
-        public async Task<Comment> GetByIdAsync(int id)
+        public async Task<Comment> GetByKeyValuesAsync(params object[] keyValues)
         {
-            return await _context.Comment.FindAsync(id);
+            return await _context.Comment.FindAsync(keyValues);
         }
 
         public async Task InsertAsync(Comment comment)

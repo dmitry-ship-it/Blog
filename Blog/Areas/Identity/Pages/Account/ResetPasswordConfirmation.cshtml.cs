@@ -12,7 +12,7 @@ namespace Blog.Areas.Identity.Pages.Account
     {
         public void OnGet()
         {
-
+            // do nothing
         }
     }
 }

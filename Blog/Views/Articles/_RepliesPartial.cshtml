@@ -7,9 +7,7 @@
 {
     <div class="card mb-2">
         <div class="card-header d-flex">
-            <div>
-                @comment.Username
-            </div>
+            @comment.Username
             @if (User.IsInRole("Administrator") || User.Identity.Name == comment.Username)
             {
                 <partial name="_DeleteCommentPartial" model="comment" />
@@ -18,10 +16,9 @@
         <div class="card-body">
             <div class="card-text">@comment.Text</div>
             <div class="text-right card-text" style="color: gray">@comment.DateCreated</div>
-            @if (comment.Replies != null && comment.Replies.Count > 0)
+            @if (comment?.Replies?.Count > 0)
             {
-                ViewData["OusideCommentId"] = comment.Id;
-                <partial name="_ReplyPartial" model=@comment.Replies view-data="ViewData" />
+                <partial name="_RepliesPartial" model="comment.Replies" view-data="ViewData" />
             }
             <div class="card-text">
                 @{ ViewData["OusideCommentId"] = comment.Id; }

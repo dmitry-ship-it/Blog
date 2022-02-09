@@ -41,7 +41,7 @@ namespace Blog.Controllers
                 return NotFound();
             }
 
-            var article = await _articleRepository.GetByIdAsync(id.Value);
+            var article = await _articleRepository.GetByKeyValuesAsync(id.Value);
 
             if (article is null)
             {
@@ -90,7 +90,7 @@ namespace Blog.Controllers
                 return NotFound();
             }
 
-            var article = await _articleRepository.GetByIdAsync(id.Value);
+            var article = await _articleRepository.GetByKeyValuesAsync(id.Value);
 
             if (article is null)
             {
@@ -146,7 +146,7 @@ namespace Blog.Controllers
                 return NotFound();
             }
 
-            var article = await _articleRepository.GetByIdAsync(id.Value);
+            var article = await _articleRepository.GetByKeyValuesAsync(id.Value);
 
             if (article is null)
             {
@@ -197,7 +197,7 @@ namespace Blog.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteComment(int id)
         {
-            var comment = await _commentRepository.GetByIdAsync(id);
+            var comment = await _commentRepository.GetByKeyValuesAsync(id);
 
             if (comment is null)
             {
@@ -227,7 +227,7 @@ namespace Blog.Controllers
 
         private bool ArticleExists(int id)
         {
-            return _articleRepository.GetByIdAsync(id) != null;
+            return _articleRepository.GetByKeyValuesAsync(id) != null;
         }
     }
 }

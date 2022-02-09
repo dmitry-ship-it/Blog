@@ -23,9 +23,9 @@ namespace Blog.DAL.Repositories
             return await _context.Users.ToListAsync();
         }
 
-        public async Task<IdentityUser> GetByIdAsync(int id)
+        public async Task<IdentityUser> GetByKeyValuesAsync(params object[] keyValues)
         {
-            return await _context.Users.FindAsync(id);
+            return await _context.Users.FindAsync(keyValues);
         }
 
         public async Task InsertAsync(IdentityUser user)
