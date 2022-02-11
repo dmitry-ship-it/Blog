@@ -1,7 +1,7 @@
-﻿@model Blog.Models.Comment
+﻿@model CommentViewModel
 @{
-    var article = ViewData["Article"] as Article;
-    var commentId = (int?)ViewData["OusideCommentId"];
+    var article = ViewData["Article"] as ArticleViewModel;
+    var ousideCommentId = (int?)ViewData["OusideCommentId"];
 }
 
 <form asp-action="AddComment">
@@ -10,7 +10,7 @@
     <input type="hidden" asp-for="Username" value=@User.Identity.Name />
     <input type="hidden" asp-for="DateCreated" value=@DateTime.Now />
     <input type="hidden" asp-for="ArticleId" value=@article?.Id />
-    <input type="hidden" asp-for="CommentId" value=@commentId />
+    <input type="hidden" asp-for="OutsideCommentId" value=@ousideCommentId />
 
     <div class="form-group mb-0 d-flex">
         <input asp-for="Text" type="text" placeholder="Leave a comment" class="text-body form-control w-50" />

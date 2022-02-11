@@ -1,4 +1,4 @@
-﻿@model IEnumerable<Blog.Models.Comment>
+﻿@model IEnumerable<CommentViewModel>
 
 <div class="card-body">
     @if (Model?.Count() == 0)
@@ -7,7 +7,7 @@
     }
     else
     {
-        @foreach (var comment in Model.Where(comm => comm.CommentId == null).OrderBy(item => item.DateCreated))
+        @foreach (var comment in Model.Where(comm => comm.OutsideCommentId == null).OrderBy(item => item.DateCreated))
         {
             ViewData["OusideCommentId"] = comment.Id;
             <div class="card mb-2">

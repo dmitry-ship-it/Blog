@@ -8,7 +8,7 @@ namespace Blog.DAL.Interfaces
     {
         Task<IEnumerable<T>> GetAllAsync();
 
-        Task<T> GetByKeyValuesAsync(params object[] keyValues);
+        Task<T> GetByIdAsync(int id);
 
         Task InsertAsync(T obj);
 

@@ -1,6 +1,7 @@
 using Blog.DAL.Interfaces;
 using Blog.DAL.Repositories;
 using Blog.Data;
+using Blog.Data.DatabaseModels;
 using Blog.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -11,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Blog
@@ -34,17 +36,13 @@ namespace Blog
                     Configuration.GetConnectionString("DefaultConnection")
                         .Replace("[DataDirectory]", dbPath)));
 
-            services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-                .AddRoles<IdentityRole>()
-                .AddEntityFrameworkStores<ApplicationDbContext>();
-
             services.AddScoped<IRepository<Article>, ArticleRepository>(x =>
                 new ArticleRepository(x.GetRequiredService<ApplicationDbContext>()));
 
             services.AddScoped<IRepository<Comment>, CommentRepository>(x =>
                 new CommentRepository(x.GetRequiredService<ApplicationDbContext>()));
 
-            services.AddScoped<IRepository<IdentityUser>, UserRepository>(x =>
+            services.AddScoped<IRepository<User>, UserRepository>(x =>
                 new UserRepository(x.GetRequiredService<ApplicationDbContext>()));
 
             services.AddControllersWithViews();
@@ -65,6 +63,7 @@ namespace Blog
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
@@ -81,16 +80,21 @@ namespace Blog
                 endpoints.MapRazorPages();
             });
 
-            CreateRoles(serviceProvider);
+            // Add default roles and default admin
+            // for application testing
+            if (env.IsDevelopment())
+            {
+                CreateRoles(serviceProvider);
+            }
         }
 
         private void CreateRoles(IServiceProvider serviceProvider)
         {
-            var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-            var userManager = serviceProvider.GetRequiredService<UserManager<IdentityUser>>();
-            Task<IdentityResult> roleResult;
+            var userRepository = serviceProvider.GetRequiredService<IRepository<User>>();
+            // Task<IdentityResult> roleResult;
 
             //Check if roles exist
+            /*
             var roles = new string[] { "Administrator", "User" };
 
             foreach (var role in roles)
@@ -104,32 +108,34 @@ namespace Blog
                     roleResult.Wait();
                 }
             }
+            */
 
             // Add default admin
             // to the Administrator role
             const string userName = "John_Doe";
-            const string email = "someone@somewhere.com";
+            // const string email = "someone@somewhere.com";
             const string password = "_AStrongP@ssword1!";
 
-            var testUser = userManager.FindByEmailAsync(email);
-            testUser.Wait();
+            var users = userRepository.GetAllAsync();
+            users.Wait();
 
-            if (testUser.Result == null)
+            var testUser = users.Result.SingleOrDefault(user => user.Username == userName);
+
+            if (testUser is null)
             {
-                var defaultAdmin = new IdentityUser
+                var defaultAdmin = new User
                 {
-                    UserName = userName,
-                    Email = email
+                    Username = userName,
+                    Password = password
                 };
 
-                var newUser = userManager.CreateAsync(defaultAdmin, password);
-                newUser.Wait();
+                userRepository.InsertAsync(defaultAdmin);
 
-                if (newUser.Result.Succeeded)
-                {
-                    var newUserRole = userManager.AddToRoleAsync(defaultAdmin, "Administrator");
-                    newUserRole.Wait();
-                }
+                //if (newUser)
+                //{
+                //    var newUserRole = userRepository.AddToRoleAsync(defaultAdmin, "Administrator");
+                //    newUserRole.Wait();
+                //}
             }
         }
     }

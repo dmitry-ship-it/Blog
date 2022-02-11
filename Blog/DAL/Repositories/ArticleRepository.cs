@@ -1,72 +1,42 @@
-﻿using Blog.DAL.Interfaces;
-using Blog.Data;
-using Blog.Models;
-using Microsoft.AspNetCore.Mvc;
+﻿using Blog.Data;
+using Blog.Data.DatabaseModels;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Blog.DAL.Repositories
 {
-    public class ArticleRepository : IRepository<Article>
+    public sealed class ArticleRepository : Repository<Article>
     {
-        private readonly ApplicationDbContext _context;
-
         public ArticleRepository(ApplicationDbContext dbContext)
+            : base(dbContext)
+        { }
+
+        public override async Task<IEnumerable<Article>> GetAllAsync()
         {
-            _context = dbContext;
+            return await _context.Articles.ToListAsync();
         }
 
-        public async Task<IEnumerable<Article>> GetAllAsync()
+        public override async Task<Article> GetByIdAsync(int id)
         {
-            return await _context.Article.ToListAsync();
+            return await _context.Articles.FindAsync(id);
         }
 
-        public async Task<Article> GetByKeyValuesAsync(params object[] keyValues)
+        public override async Task InsertAsync(Article article)
         {
-            return await _context.Article.FindAsync(keyValues);
+            await _context.Articles.AddAsync(article);
         }
 
-        public async Task InsertAsync(Article article)
+        public override void Update(Article article)
         {
-            await _context.Article.AddAsync(article);
+            _context.Articles.Update(article);
         }
 
-        public void Update(Article article)
+        public override async Task DeleteAsync(int id)
         {
-            _context.Article.Update(article);
-        }
+            var article = await _context.Articles.FindAsync(id);
 
-        public async Task DeleteAsync(int id)
-        {
-            var article = await _context.Article.FindAsync(id);
-
-            _context.Article.Remove(article);
-        }
-
-        public async Task SaveAsync()
-        {
-            await _context.SaveChangesAsync();
-        }
-
-        private bool _disposed = false;
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!_disposed && disposing)
-            {
-                _context?.Dispose();
-            }
-
-            _disposed = true;
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
+            _context.Articles.Remove(article);
         }
     }
 }

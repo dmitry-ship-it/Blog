@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
 using Blog.DAL.Interfaces;
 using Blog.DAL.Repositories;
+using Blog.Data.DatabaseModels;
 
 #pragma warning disable S4144 // Methods should not have identical implementations
 
@@ -43,7 +44,7 @@ namespace Blog.Controllers
                 return NotFound();
             }
 
-            var article = await _articleRepository.GetByKeyValuesAsync(id.Value);
+            var article = await _articleRepository.GetByIdAsync(id.Value);
 
             if (article is null)
             {
@@ -54,7 +55,6 @@ namespace Blog.Controllers
         }
 
         // GET: Articles/Create
-        [Authorize(Roles = "Administrator")]
         public IActionResult Create()
         {
             return View();
@@ -65,7 +65,6 @@ namespace Blog.Controllers
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> Create([Bind("Id,Title,Text,Date")] Article article)
         {
             if (ModelState.IsValid)
@@ -84,7 +83,6 @@ namespace Blog.Controllers
         }
 
         // GET: Articles/Edit/5
-        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id is null)
@@ -92,7 +90,7 @@ namespace Blog.Controllers
                 return NotFound();
             }
 
-            var article = await _articleRepository.GetByKeyValuesAsync(id.Value);
+            var article = await _articleRepository.GetByIdAsync(id.Value);
 
             if (article is null)
             {
@@ -107,7 +105,6 @@ namespace Blog.Controllers
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Text,Date")] Article article)
         {
             if (id != article?.Id)
@@ -140,7 +137,6 @@ namespace Blog.Controllers
         }
 
         // GET: Articles/Delete/5
-        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id is null)
@@ -148,7 +144,7 @@ namespace Blog.Controllers
                 return NotFound();
             }
 
-            var article = await _articleRepository.GetByKeyValuesAsync(id.Value);
+            var article = await _articleRepository.GetByIdAsync(id.Value);
 
             if (article is null)
             {
@@ -161,7 +157,6 @@ namespace Blog.Controllers
         // POST: Articles/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             await _articleRepository.DeleteAsync(id);
@@ -199,7 +194,7 @@ namespace Blog.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteComment(int id)
         {
-            var comment = await _commentRepository.GetByKeyValuesAsync(id);
+            var comment = await _commentRepository.GetByIdAsync(id);
 
             if (comment is null)
             {
@@ -229,7 +224,7 @@ namespace Blog.Controllers
 
         private bool ArticleExists(int id)
         {
-            return _articleRepository.GetByKeyValuesAsync(id) != null;
+            return _articleRepository.GetByIdAsync(id) != null;
         }
     }
 }
