@@ -1,4 +1,7 @@
+using Blog.DAL.Interfaces;
+using Blog.DAL.Repositories;
 using Blog.Data;
+using Blog.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -34,6 +37,15 @@ namespace Blog
             services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
+
+            services.AddScoped<IRepository<Article>, ArticleRepository>(x =>
+                new ArticleRepository(x.GetRequiredService<ApplicationDbContext>()));
+
+            services.AddScoped<IRepository<Comment>, CommentRepository>(x =>
+                new CommentRepository(x.GetRequiredService<ApplicationDbContext>()));
+
+            services.AddScoped<IRepository<IdentityUser>, UserRepository>(x =>
+                new UserRepository(x.GetRequiredService<ApplicationDbContext>()));
 
             services.AddControllersWithViews();
             services.AddRazorPages();

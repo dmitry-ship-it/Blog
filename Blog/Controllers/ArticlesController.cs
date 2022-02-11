@@ -20,11 +20,13 @@ namespace Blog.Controllers
 
         private readonly ILogger<ArticlesController> _logger;
 
-        public ArticlesController(ILogger<ArticlesController> logger, ApplicationDbContext dbContext)
+        public ArticlesController(ILogger<ArticlesController> logger,
+            IRepository<Article> articleRepository,
+            IRepository<Comment> commentRepository)
         {
-            _articleRepository = new ArticleRepository(dbContext);
-            _commentRepository = new CommentRepository(dbContext);
             _logger = logger;
+            _articleRepository = articleRepository;
+            _commentRepository = commentRepository;
         }
 
         // GET: Articles
