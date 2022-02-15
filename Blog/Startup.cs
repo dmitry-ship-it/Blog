@@ -1,19 +1,20 @@
-using Blog.DAL.Interfaces;
 using Blog.DAL.Repositories;
 using Blog.Data;
-using Blog.Data.DatabaseModels;
+using Blog.Data.DbModels;
+using Blog.Data.Validation;
 using Blog.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Text;
 
 namespace Blog
 {
@@ -36,17 +37,51 @@ namespace Blog
                     Configuration.GetConnectionString("DefaultConnection")
                         .Replace("[DataDirectory]", dbPath)));
 
-            services.AddScoped<IRepository<Article>, ArticleRepository>(x =>
+            #region Repositories
+
+            services.AddScoped<Repository<Article>, ArticleRepository>(x =>
                 new ArticleRepository(x.GetRequiredService<ApplicationDbContext>()));
 
-            services.AddScoped<IRepository<Comment>, CommentRepository>(x =>
+            services.AddScoped<Repository<Comment>, CommentRepository>(x =>
                 new CommentRepository(x.GetRequiredService<ApplicationDbContext>()));
 
-            services.AddScoped<IRepository<User>, UserRepository>(x =>
+            services.AddScoped<Repository<User>, UserRepository>(x =>
                 new UserRepository(x.GetRequiredService<ApplicationDbContext>()));
+
+            #endregion
 
             services.AddControllersWithViews();
             services.AddRazorPages();
+
+            #region JWToken
+
+            SiteKeys.Configure(Configuration.GetSection("AppSettings"));
+            var key = Encoding.ASCII.GetBytes(SiteKeys.Token);
+
+            services.AddSession(options => options.IdleTimeout = TimeSpan.FromMinutes(60));
+            services.AddAuthentication(auth =>
+            {
+                auth.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                auth.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(token =>
+            {
+                token.RequireHttpsMetadata = false;
+                token.SaveToken = true;
+                token.TokenValidationParameters = new TokenValidationParameters()
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateIssuer = true,
+                    ValidIssuer = SiteKeys.WebSiteDomain,
+                    ValidateAudience = true,
+                    ValidAudience = SiteKeys.WebSiteDomain,
+                    RequireExpirationTime = true,
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.Zero
+                };
+            });
+
+            #endregion
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -69,8 +104,25 @@ namespace Blog
 
             app.UseRouting();
 
+            #region JWToken
+
+            app.UseCookiePolicy();
+            app.UseSession();
+            app.Use(async (context, next) =>
+            {
+                var JWToken = context.Session.GetString("JWToken");
+                if (!string.IsNullOrEmpty(JWToken))
+                {
+                    context.Request.Headers.Add("Authorization", $"Bearer {JWToken}");
+                }
+
+                await next();
+            });
+
             app.UseAuthentication();
             app.UseAuthorization();
+
+            #endregion
 
             app.UseEndpoints(endpoints =>
             {
@@ -82,60 +134,28 @@ namespace Blog
 
             // Add default roles and default admin
             // for application testing
-            if (env.IsDevelopment())
-            {
-                CreateRoles(serviceProvider);
-            }
+            AddDefaultUser(serviceProvider);
         }
 
-        private void CreateRoles(IServiceProvider serviceProvider)
+        private void AddDefaultUser(IServiceProvider serviceProvider)
         {
-            var userRepository = serviceProvider.GetRequiredService<IRepository<User>>();
-            // Task<IdentityResult> roleResult;
-
-            //Check if roles exist
-            /*
-            var roles = new string[] { "Administrator", "User" };
-
-            foreach (var role in roles)
-            {
-                var roleExists = roleManager.RoleExistsAsync(role);
-                roleExists.Wait();
-
-                if (!roleExists.Result)
-                {
-                    roleResult = roleManager.CreateAsync(new IdentityRole(role));
-                    roleResult.Wait();
-                }
-            }
-            */
+            var userRepository = serviceProvider.GetRequiredService<Repository<User>>();
 
             // Add default admin
             // to the Administrator role
-            const string userName = "John_Doe";
-            // const string email = "someone@somewhere.com";
+            const string username = "John_Doe";
             const string password = "_AStrongP@ssword1!";
 
-            var users = userRepository.GetAllAsync();
-            users.Wait();
+            var testUser = userRepository.GetAsync(user => user.Username == username);
+            testUser.Wait();
 
-            var testUser = users.Result.SingleOrDefault(user => user.Username == userName);
-
-            if (testUser is null)
+            // if there no user with specified userName  
+            if (testUser.Result is null)
             {
-                var defaultAdmin = new User
-                {
-                    Username = userName,
-                    Password = password
-                };
+                var defaultAdmin = UserProtector.CreateUser(username, password, Role.Admin);
 
-                userRepository.InsertAsync(defaultAdmin);
-
-                //if (newUser)
-                //{
-                //    var newUserRole = userRepository.AddToRoleAsync(defaultAdmin, "Administrator");
-                //    newUserRole.Wait();
-                //}
+                userRepository.InsertAsync(defaultAdmin).Wait();
+                userRepository.SaveAsync().Wait();
             }
         }
     }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace Blog.DAL.Interfaces
@@ -8,7 +9,7 @@ namespace Blog.DAL.Interfaces
     {
         Task<IEnumerable<T>> GetAllAsync();
 
-        Task<T> GetByIdAsync(int id);
+        Task<T> GetAsync(Expression<Func<T, bool>> expression);
 
         Task InsertAsync(T obj);
 

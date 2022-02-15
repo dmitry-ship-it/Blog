@@ -1,4 +1,4 @@
-﻿@model CommentViewModel
+﻿@model AddCommentModel
 @{
     var article = ViewData["Article"] as ArticleViewModel;
     var ousideCommentId = (int?)ViewData["OusideCommentId"];
@@ -8,7 +8,7 @@
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
     <input type="hidden" asp-for="Username" value=@User.Identity.Name />
-    <input type="hidden" asp-for="DateCreated" value=@DateTime.Now />
+    <input type="hidden" asp-for="Date" value=@DateTime.Now />
     <input type="hidden" asp-for="ArticleId" value=@article?.Id />
     <input type="hidden" asp-for="OutsideCommentId" value=@ousideCommentId />
 

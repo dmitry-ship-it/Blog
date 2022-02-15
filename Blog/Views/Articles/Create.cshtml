@@ -1,4 +1,4 @@
-﻿@model ArticleViewModel
+﻿@model CreateArticleModel
 
 @{
     ViewData["Title"] = "Create article";
@@ -22,6 +22,9 @@
                 <textarea asp-for="Text" class="form-control" rows="20"></textarea>
                 <span asp-validation-for="Text" class="text-danger"></span>
             </div>
+
+            <input type="hidden" asp-for="Date" value=@DateTime.Now />
+            <input type="hidden" asp-for="Username" value=@User.Identity.Name />
 
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />

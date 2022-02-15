@@ -1,7 +1,9 @@
 ﻿using Blog.Data;
-using Blog.Data.DatabaseModels;
+using Blog.Data.DbModels;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace Blog.DAL.Repositories
@@ -17,14 +19,24 @@ namespace Blog.DAL.Repositories
             return await _context.Users.ToListAsync();
         }
 
-        public override async Task<User> GetByIdAsync(int id)
+        public override async Task<User> GetAsync(Expression<Func<User, bool>> expression)
         {
-            return await _context.Users.FindAsync(id);
+            return await _context.Users.SingleOrDefaultAsync(expression);
         }
 
         public override async Task InsertAsync(User user)
         {
-            await _context.Users.AddAsync(user);
+            var dbUser = await _context.Users.SingleOrDefaultAsync(u => u.Username == user.Username);
+
+            // check if user with the same Username exists
+            if (dbUser is null)
+            {
+                await _context.Users.AddAsync(user);
+            }
+            else
+            {
+                throw new ArgumentException($"User {user.Username} already exists.", nameof(user));
+            }
         }
 
         public override void Update(User user)

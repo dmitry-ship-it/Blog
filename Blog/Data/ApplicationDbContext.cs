@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Blog.Models;
-using Microsoft.AspNetCore.Identity;
-using Blog.Data.DatabaseModels;
+using Blog.Data.DbModels;
 
 namespace Blog.Data
 {
@@ -21,9 +20,9 @@ namespace Blog.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            modelBuilder.Entity<Article>(entity => entity.ToTable(name: "Article"));
+            modelBuilder.Entity<Comment>(entity => entity.ToTable(name: "Comment"));
             modelBuilder.Entity<User>(entity => entity.ToTable(name: "User"));
-            modelBuilder.Entity<IdentityRole>(entity => entity.ToTable(name: "Role"));
-            modelBuilder.Entity<IdentityUserToken<string>>(entity => entity.ToTable(name: "UserTokens"));
         }
 
         public DbSet<Article> Articles { get; set; }

@@ -2,6 +2,7 @@
 using Blog.Data;
 using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace Blog.DAL.Repositories
@@ -17,7 +18,7 @@ namespace Blog.DAL.Repositories
 
         public abstract Task<IEnumerable<T>> GetAllAsync();
 
-        public abstract Task<T> GetByIdAsync(int id);
+        public abstract Task<T> GetAsync(Expression<Func<T, bool>> expression);
 
         public abstract Task InsertAsync(T obj);
 

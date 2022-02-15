@@ -1,28 +1,29 @@
-﻿using Blog.Data;
+﻿using Blog.DAL.Repositories;
+using Blog.Data.DbModels;
 using Blog.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace Blog.Controllers
 {
+    [AllowAnonymous]
     public class HomeController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly Repository<Article> _articleRepository;
 
-        public HomeController(ApplicationDbContext context)
+        public HomeController(Repository<Article> articleRepository)
         {
-            _context = context;
+            _articleRepository = articleRepository;
         }
 
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Articles.ToListAsync());
+            var articles = await _articleRepository.GetAllAsync();
+
+            return View(articles.Select(item => (ArticleViewModel)item));
         }
 
         public IActionResult Privacy()
@@ -30,6 +31,7 @@ namespace Blog.Controllers
             return View();
         }
 
+        [Route("/Error")]
         public IActionResult Error()
         {
             return View(new ErrorViewModel

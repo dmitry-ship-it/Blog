@@ -1,4 +1,5 @@
-﻿@model IEnumerable<ArticleViewModel>
+﻿@using Blog.Data.DbModels
+@model IEnumerable<ArticleViewModel>
 
 @{
     ViewData["Title"] = "Articles";
@@ -6,7 +7,8 @@
 
 <div class="h1 mb-4">Articles</div>
 
-@foreach (var item in Model) {
+@foreach (var item in Model)
+{
     <div class="card mb-5">
         <div class="card-header h5">@item.Title</div>
         <div class="card-body">
@@ -18,12 +20,12 @@
                 }
             </div>
             <div class="card-text text-right" style="color: gray">
-                @item.Date
+                @item.Date by @item.Username
             </div>
 
             <div class="card-text">
                 <a asp-action="Details" asp-route-id="@item.Id" class="btn m-1">@item.Comments.Count() comments</a>
-                @if (User.IsInRole("Administrator"))
+                @if (User.IsInRole(nameof(Role.Admin)) || User.Identity.Name == item.Username)
                 {
                     <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-secondary m-1">Edit</a>
                     <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger m-1">Delete</a>
@@ -33,10 +35,6 @@
     </div>
 }
 
-@if (User.IsInRole("Administrator"))
-{
-    <p>
-        <a asp-action="Create" class="btn btn-primary m-1">Create New</a>
-    </p>
-}
-
+<p>
+    <a asp-action="Create" class="btn btn-primary m-1">Create New</a>
+</p>

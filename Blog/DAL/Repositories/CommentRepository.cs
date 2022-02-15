@@ -1,7 +1,10 @@
 ﻿using Blog.Data;
-using Blog.Data.DatabaseModels;
+using Blog.Data.DbModels;
+using Blog.Models;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace Blog.DAL.Repositories
@@ -17,9 +20,9 @@ namespace Blog.DAL.Repositories
             return await _context.Comments.ToListAsync();
         }
 
-        public override async Task<Comment> GetByIdAsync(int id)
+        public override async Task<Comment> GetAsync(Expression<Func<Comment, bool>> expression)
         {
-            return await _context.Comments.FindAsync(id);
+            return await _context.Comments.SingleOrDefaultAsync(expression);
         }
 
         public override async Task InsertAsync(Comment comment)

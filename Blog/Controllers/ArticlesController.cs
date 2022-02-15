@@ -1,29 +1,28 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Blog.Data;
 using Blog.Models;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
-using Blog.DAL.Interfaces;
 using Blog.DAL.Repositories;
-using Blog.Data.DatabaseModels;
-
-#pragma warning disable S4144 // Methods should not have identical implementations
+using Microsoft.AspNetCore.Authorization;
+using Blog.Data.DbModels;
+using System.Linq;
+using Blog.Data.Validation;
 
 namespace Blog.Controllers
 {
+    [AllowAnonymous]
     public class ArticlesController : Controller
     {
-        private readonly IRepository<Article> _articleRepository;
+        private readonly Repository<Article> _articleRepository;
 
-        private readonly IRepository<Comment> _commentRepository;
+        private readonly Repository<Comment> _commentRepository;
 
         private readonly ILogger<ArticlesController> _logger;
 
         public ArticlesController(ILogger<ArticlesController> logger,
-            IRepository<Article> articleRepository,
-            IRepository<Comment> commentRepository)
+            Repository<Article> articleRepository,
+            Repository<Comment> commentRepository)
         {
             _logger = logger;
             _articleRepository = articleRepository;
@@ -33,7 +32,9 @@ namespace Blog.Controllers
         // GET: Articles
         public async Task<IActionResult> Index()
         {
-            return View(await _articleRepository.GetAllAsync());
+            var articles = await _articleRepository.GetAllAsync();
+
+            return View(articles.Select(item => (ArticleViewModel)item));
         }
 
         // GET: Articles/Details/5
@@ -44,17 +45,18 @@ namespace Blog.Controllers
                 return NotFound();
             }
 
-            var article = await _articleRepository.GetByIdAsync(id.Value);
+            var article = await _articleRepository.GetAsync(article => article.Id == id);
 
             if (article is null)
             {
                 return NotFound();
             }
 
-            return View(article);
+            return View((ArticleViewModel)article);
         }
 
         // GET: Articles/Create
+        [RequireAuthorization]
         public IActionResult Create()
         {
             return View();
@@ -64,25 +66,25 @@ namespace Blog.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to, for 
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Title,Text,Date")] Article article)
+        [RequireAuthorization]
+        public async Task<IActionResult> Create(CreateArticleModel model)
         {
-            if (ModelState.IsValid)
+            await _articleRepository.InsertAsync(new Article()
             {
-                await _articleRepository.InsertAsync(article);
-                await _articleRepository.SaveAsync();
+                Title = model.Title,
+                Text = model.Text,
+                Date = model.Date,
+                Username = model.Username
+            });
+            await _articleRepository.SaveAsync();
 
-                _logger.LogInformation($"Article (id = {article.Id}) is created.");
+            _logger.LogInformation($"New article is created by {model.Username}.");
 
-                return RedirectToAction(nameof(Index));
-            }
-
-            _logger.LogWarning($"Article (id = {article.Id}) is not created.");
-
-            return View(article);
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Articles/Edit/5
+        [RequireAuthorization]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id is null)
@@ -90,53 +92,65 @@ namespace Blog.Controllers
                 return NotFound();
             }
 
-            var article = await _articleRepository.GetByIdAsync(id.Value);
+            var article = await _articleRepository.GetAsync(article => article.Id == id);
 
             if (article is null)
             {
                 return NotFound();
             }
 
-            return View(article);
+            if (article.Username != HttpContext.User.Identity.Name
+                && !HttpContext.User.IsInRole(nameof(Role.Admin)))
+            {
+                return Forbid();
+            }
+
+            return View(new EditArticleModel()
+            {
+                Title = article.Title,
+                Text = article.Text,
+                Date = article.Date,
+                Username = article.Username,
+                Comments = article.Comments.Select(item => (CommentViewModel)item).ToList()
+            });
         }
 
         // POST: Articles/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to, for 
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
+        [RequireAuthorization]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Text,Date")] Article article)
+        public async Task<IActionResult> Edit(int id, EditArticleModel model)
         {
-            if (id != article?.Id)
+            try
             {
+                var article = new Article()
+                {
+                    Id = id,
+                    Title = model.Title,
+                    Text = model.Text,
+                    Date = model.Date,
+                    Username = model.Username,
+                    Comments = model.Comments.Select(item => (Comment)item).ToList()
+                };
+                _articleRepository.Update(article);
+                await _articleRepository.SaveAsync();
+            }
+            catch (DbUpdateConcurrencyException) when (!ArticleExists(id))
+            {
+                _logger.LogWarning($"Article (id = {id}) is not changed (not found).");
+
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    _articleRepository.Update(article);
-                    await _articleRepository.SaveAsync();
-                }
-                catch (DbUpdateConcurrencyException) when (!ArticleExists(article.Id))
-                {
-                    _logger.LogWarning($"Article (id = {article.Id}) is not changed (not found).");
+            _logger.LogInformation($"Article (id = {id}) is changed.");
 
-                    return NotFound();
-                }
-
-                _logger.LogInformation($"Article (id = {article.Id}) is changed.");
-
-                return RedirectToAction(nameof(Index));
-            }
-
-            _logger.LogWarning($"Article (id = {article.Id}) is not changed (model state invalid).");
-
-            return View(article);
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Articles/Delete/5
+        [RequireAuthorization]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id is null)
@@ -144,18 +158,25 @@ namespace Blog.Controllers
                 return NotFound();
             }
 
-            var article = await _articleRepository.GetByIdAsync(id.Value);
+            var article = await _articleRepository.GetAsync(article => article.Id == id);
 
             if (article is null)
             {
                 return NotFound();
             }
 
-            return View(article);
+            if (article.Username != HttpContext.User.Identity.Name
+                && !User.IsInRole(nameof(Role.Admin)))
+            {
+                return Forbid();
+            }
+
+            return View((ArticleViewModel)article);
         }
 
         // POST: Articles/Delete/5
         [HttpPost, ActionName("Delete")]
+        [RequireAuthorization]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
@@ -169,32 +190,39 @@ namespace Blog.Controllers
 
         // POST: Articles/AddComment
         [HttpPost]
-        [Authorize]
+        [RequireAuthorization]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddComment([Bind("Id,Username,Text,DateCreated,ArticleId,CommentId")] Comment comment)
+        public async Task<IActionResult> AddComment(AddCommentModel model)
         {
             if (ModelState.IsValid)
             {
-                await _commentRepository.InsertAsync(comment);
+                await _commentRepository.InsertAsync(new Comment()
+                {
+                    Text = model.Text,
+                    Username = model.Username,
+                    DateCreated = model.Date,
+                    ArticleId = model.ArticleId,
+                    OutsideCommentId = model.OutsideCommentId
+                });
                 await _commentRepository.SaveAsync();
 
-                _logger.LogInformation($"Comment (id = {comment.Id}) added.");
+                _logger.LogInformation($"New comment added by {model.Username} to article id = {model.ArticleId}.");
             }
             else
             {
-                _logger.LogWarning($"Comment (id = {comment.Id}) is not added (model state is invalid).");
+                _logger.LogWarning("An error occurred while adding a comment (model state is invalid).");
             }
 
-            return RedirectToAction("Details", new { id = comment!.ArticleId });
+            return RedirectToAction("Details", new { id = model.ArticleId });
         }
 
         // POST: Articles/DeleteComment
         [HttpPost]
-        [Authorize]
+        [RequireAuthorization]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteComment(int id)
         {
-            var comment = await _commentRepository.GetByIdAsync(id);
+            var comment = await _commentRepository.GetAsync(comment => comment.Id == id);
 
             if (comment is null)
             {
@@ -224,7 +252,7 @@ namespace Blog.Controllers
 
         private bool ArticleExists(int id)
         {
-            return _articleRepository.GetByIdAsync(id) != null;
+            return _articleRepository.GetAsync(comment => comment.Id == id) != null;
         }
     }
 }

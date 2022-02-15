@@ -1,16 +1,21 @@
-﻿@using Blog.DAL.Repositories
-@using Blog.Data.DatabaseModels
-@inject UserRepository UserManager
+﻿@using Blog.Data.DbModels
 
 <ul class="navbar-nav">
-    @* TODO: IsSignedIn *@
-@if (true)
+@if (User.Identity.IsAuthenticated)
 {
     <li class="nav-item">
-        <a  class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hello @User.Identity.Name!</a>
+        <div class="row mr-1">
+            <div class="nav-link text-dark">
+                Hello @User.Identity.Name!
+            </div>
+            @if (User.IsInRole(nameof(Role.Admin)))
+            {
+                <div class="nav-link text-danger mr-3 ml-0">(Admin)</div>
+            }
+        </div>
     </li>
     <li class="nav-item">
-        <form  class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+        <form  class="form-inline" asp-controller="User" asp-action="Logout">
             <button  type="submit" class="nav-link btn btn-link text-dark">Logout</button>
         </form>
     </li>
@@ -18,10 +23,10 @@
 else
 {
     <li class="nav-item">
-        <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Register">Register</a>
+        <a class="nav-link text-dark" asp-controller="User" asp-action="Register">Register</a>
     </li>
     <li class="nav-item">
-        <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Login">Login</a>
+        <a class="nav-link text-dark" asp-controller="User" asp-action="Login">Login</a>
     </li>
 }
 </ul>
