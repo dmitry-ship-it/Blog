@@ -1,71 +1,48 @@
-﻿using Blog.DAL.Interfaces;
-using Blog.Data;
-using Blog.Models;
+﻿using Blog.Data;
+using Blog.Data.DbModels;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace Blog.DAL.Repositories
 {
-    public class CommentRepository : IRepository<Comment>
+    public sealed class CommentRepository : Repository<Comment>
     {
-        private readonly ApplicationDbContext _context;
-
         public CommentRepository(ApplicationDbContext dbContext)
+            : base(dbContext)
+        { }
+
+        public override async Task<IEnumerable<Comment>> GetAllAsync()
         {
-            _context = dbContext;
+            return await _context.Comments.ToListAsync();
         }
 
-        public async Task<IEnumerable<Comment>> GetAllAsync()
+        public override async Task<Comment> GetAsync(Expression<Func<Comment, bool>> expression)
         {
-            return await _context.Comment.ToListAsync();
+            return await _context.Comments.SingleOrDefaultAsync(expression);
         }
 
-        public async Task<Comment> GetByKeyValuesAsync(params object[] keyValues)
+        public override async Task InsertAsync(Comment comment)
         {
-            return await _context.Comment.FindAsync(keyValues);
-        }
-
-        public async Task InsertAsync(Comment comment)
-        {
-            await _context.Comment.AddAsync(comment);
-        }
-
-        public void Update(Comment comment)
-        {
-            _context.Comment.Update(comment);
-        }
-
-        public async Task DeleteAsync(int id)
-        {
-            var comment = await _context.Comment.FindAsync(id);
-
-            _context.Comment.Remove(comment);
-        }
-
-        public async Task SaveAsync()
-        {
+            await _context.Comments.AddAsync(comment);
             await _context.SaveChangesAsync();
         }
 
-        private bool _disposed = false;
-
-        protected virtual void Dispose(bool disposing)
+        public override async Task Update(Comment comment)
         {
-            if (!_disposed && disposing)
-            {
-                _context?.Dispose();
-            }
-
-            _disposed = true;
+            _context.Comments.Update(comment);
+            await _context.SaveChangesAsync();
         }
 
-        public void Dispose()
+        public override async Task DeleteAsync(int id)
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
+            var comment = await _context.Comments.FindAsync(id);
+
+            _context.Comments.Remove(comment);
+
+            await _context.SaveChangesAsync();
         }
     }
 }

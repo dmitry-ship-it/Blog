@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace Blog.DAL.Interfaces
@@ -8,14 +9,12 @@ namespace Blog.DAL.Interfaces
     {
         Task<IEnumerable<T>> GetAllAsync();
 
-        Task<T> GetByKeyValuesAsync(params object[] keyValues);
+        Task<T> GetAsync(Expression<Func<T, bool>> expression);
 
         Task InsertAsync(T obj);
 
-        void Update(T obj);
+        Task Update(T obj);
 
         Task DeleteAsync(int id);
-
-        Task SaveAsync();
     }
 }

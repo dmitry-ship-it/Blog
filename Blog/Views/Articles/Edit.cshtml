@@ -1,4 +1,4 @@
-﻿@model Blog.Models.Article
+﻿@model EditArticleModel
 
 @{
     ViewData["Title"] = "Edit";
@@ -10,7 +10,6 @@
     <div class="col">
         <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
 
             <div class="form-group">
                 <label asp-for="Title" class="control-label"></label>
@@ -25,6 +24,8 @@
             </div>
 
             <input type="hidden" asp-for="Date" value=@Model.Date />
+            <input type="hidden" asp-for="Username" value=@Model.Username />
+            <input type="hidden" asp-for="Comments" value=@Model.Comments />
 
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />

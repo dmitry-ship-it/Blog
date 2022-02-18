@@ -1,71 +1,59 @@
-﻿using Blog.DAL.Interfaces;
-using Blog.Data;
-using Microsoft.AspNetCore.Identity;
+﻿using Blog.Data;
+using Blog.Data.DbModels;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace Blog.DAL.Repositories
 {
-    public class UserRepository : IRepository<IdentityUser>
+    public sealed class UserRepository : Repository<User>
     {
-        private readonly ApplicationDbContext _context;
-
         public UserRepository(ApplicationDbContext dbContext)
-        {
-            _context = dbContext;
-        }
+            : base(dbContext)
+        { }
 
-        public async Task<IEnumerable<IdentityUser>> GetAllAsync()
+        public override async Task<IEnumerable<User>> GetAllAsync()
         {
             return await _context.Users.ToListAsync();
         }
 
-        public async Task<IdentityUser> GetByKeyValuesAsync(params object[] keyValues)
+        public override async Task<User> GetAsync(Expression<Func<User, bool>> expression)
         {
-            return await _context.Users.FindAsync(keyValues);
+            return await _context.Users.SingleOrDefaultAsync(expression);
         }
 
-        public async Task InsertAsync(IdentityUser user)
+        public override async Task InsertAsync(User user)
         {
-            await _context.Users.AddAsync(user);
+            var dbUser = await _context.Users.SingleOrDefaultAsync(u => u.Username == user.Username);
+
+            // check if user with the same Username exists
+            if (dbUser is null)
+            {
+                await _context.Users.AddAsync(user);
+            }
+            else
+            {
+                throw new ArgumentException($"User {user.Username} already exists.", nameof(user));
+            }
+
+            await _context.SaveChangesAsync();
         }
 
-        public void Update(IdentityUser user)
+        public override async Task Update(User user)
         {
             _context.Users.Update(user);
+            await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteAsync(int id)
+        public override async Task DeleteAsync(int id)
         {
             var user = await _context.Users.FindAsync(id);
 
             _context.Users.Remove(user);
-        }
 
-        public async Task SaveAsync()
-        {
             await _context.SaveChangesAsync();
-        }
-
-        private bool _disposed = false;
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!_disposed && disposing)
-            {
-                _context?.Dispose();
-            }
-
-            _disposed = true;
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
         }
     }
 }

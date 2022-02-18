@@ -1,13 +1,10 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Microsoft.EntityFrameworkCore;
 using Blog.Models;
+using Blog.Data.DbModels;
 
 namespace Blog.Data
 {
-    public class ApplicationDbContext : IdentityDbContext
+    public class ApplicationDbContext : DbContext
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
@@ -19,7 +16,17 @@ namespace Blog.Data
             optionsBuilder.UseLazyLoadingProxies();
         }
 
-        public DbSet<Article> Article { get; set; }
-        public DbSet<Comment> Comment { get; set; }
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<Article>(entity => entity.ToTable(name: "Article"));
+            modelBuilder.Entity<Comment>(entity => entity.ToTable(name: "Comment"));
+            modelBuilder.Entity<User>(entity => entity.ToTable(name: "User"));
+        }
+
+        public DbSet<Article> Articles { get; set; }
+        public DbSet<Comment> Comments { get; set; }
+        public DbSet<User> Users { get; set; }
     }
 }

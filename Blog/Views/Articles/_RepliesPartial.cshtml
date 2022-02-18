@@ -1,4 +1,5 @@
-﻿@model IEnumerable<Comment>
+﻿@using Blog.Data.DbModels
+@model IEnumerable<CommentViewModel>
 @{
     var outsideCommentId = (int)ViewData["OusideCommentId"];
 }
@@ -8,7 +9,7 @@
     <div class="card mb-2">
         <div class="card-header d-flex">
             @comment.Username
-            @if (User.IsInRole("Administrator") || User.Identity.Name == comment.Username)
+            @if (User.IsInRole(nameof(Role.Admin)) || User.Identity.Name == comment.Username)
             {
                 <partial name="_DeleteCommentPartial" model="comment" />
             }
@@ -22,7 +23,7 @@
             }
             <div class="card-text">
                 @{ ViewData["OusideCommentId"] = comment.Id; }
-                <partial name="_AddCommentPartial" model="new Comment()" view-data="ViewData" />
+                <partial name="_AddCommentPartial" model="new AddCommentModel()" view-data="ViewData" />
             </div>
         </div>
     </div>

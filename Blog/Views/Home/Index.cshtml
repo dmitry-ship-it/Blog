@@ -1,4 +1,5 @@
-﻿@model IEnumerable<Blog.Models.Article>
+﻿@using Blog.Data.DbModels
+@model IEnumerable<ArticleViewModel>
 
 @{
     ViewData["Title"] = "Home Page";
@@ -16,18 +17,14 @@
                 <div class="h6">
                     <strong>@article.Comments.Count()</strong> comments.
                 </div>
-                <div class="h6" style="color: gray">
-                    @article.Date
+                <div class="h6 d-flex" style="color: gray">
+                    @article.Date by @article.Username
                 </div>
             </div>
         </div>
     </a>
 }
 
-@if (User.IsInRole("Administrator"))
-{
-    <p>
-        <a asp-controller="Articles" asp-action="Create" class="btn btn-primary m-1">Create New</a>
-    </p>
-}
-
+<p>
+    <a asp-controller="Articles" asp-action="Create" class="btn btn-primary m-1">Create New</a>
+</p>

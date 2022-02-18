@@ -1,4 +1,5 @@
-﻿@model IEnumerable<Blog.Models.Comment>
+﻿@using Blog.Data.DbModels
+@model IEnumerable<CommentViewModel>
 
 <div class="card-body">
     @if (Model?.Count() == 0)
@@ -7,13 +8,13 @@
     }
     else
     {
-        @foreach (var comment in Model.Where(comm => comm.CommentId == null).OrderBy(item => item.DateCreated))
+        @foreach (var comment in Model.Where(comm => comm.OutsideCommentId == null).OrderBy(item => item.DateCreated))
         {
             ViewData["OusideCommentId"] = comment.Id;
             <div class="card mb-2">
                 <div class="card-header d-flex">
                     @comment.Username
-                    @if (User.IsInRole("Administrator") || User.Identity.Name == comment.Username)
+                    @if (User.IsInRole(nameof(Role.Admin)) || User.Identity.Name == comment.Username)
                     {
                         <partial name="_DeleteCommentPartial" model="comment" />
                     }
@@ -26,11 +27,11 @@
                         <partial name="_RepliesPartial" model="comment.Replies" view-data="ViewData" />
                     }
                     <div class="card-text">
-                        <partial name="_AddCommentPartial" model="new Comment()" view-data="ViewData" />
+                        <partial name="_AddCommentPartial" model="new AddCommentModel()" view-data="ViewData" />
                     </div>
                 </div>
             </div>
         }
     }
-    <partial name="_AddCommentPartial" model="new Comment()" />
+    <partial name="_AddCommentPartial" model="new AddCommentModel()" />
 </div>
