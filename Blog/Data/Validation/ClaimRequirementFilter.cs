@@ -21,7 +21,7 @@ namespace Blog.Data.Validation
 
             if (!hasClaim)
             {
-                context.Result = new ForbidResult();
+                context.Result = new RedirectResult("~/User/Login");
             }
         }
     }

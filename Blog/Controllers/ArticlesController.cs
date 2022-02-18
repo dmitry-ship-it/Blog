@@ -3,10 +3,12 @@ using Blog.Data.DbModels;
 using Blog.Data.Validation;
 using Blog.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace Blog.Controllers
@@ -101,7 +103,7 @@ namespace Blog.Controllers
             if (article.Username != HttpContext.User.Identity.Name
                 && !HttpContext.User.IsInRole(nameof(Role.Admin)))
             {
-                return Forbid();
+                return Unauthorized();
             }
 
             return View(new EditArticleModel()
@@ -166,7 +168,7 @@ namespace Blog.Controllers
             if (article.Username != HttpContext.User.Identity.Name
                 && !User.IsInRole(nameof(Role.Admin)))
             {
-                return Forbid();
+                return Unauthorized();
             }
 
             return View((ArticleViewModel)article);
@@ -232,6 +234,7 @@ namespace Blog.Controllers
             return RedirectToAction("Details", new { id = comment.ArticleId });
         }
 
+        [NonAction]
         private async Task RemoveCommentAndRepliesRecursive(Comment comment)
         {
             if (comment.Replies.Count != 0)
@@ -245,6 +248,7 @@ namespace Blog.Controllers
             await _commentRepository.DeleteAsync(comment.Id);
         }
 
+        [NonAction]
         private bool ArticleExists(int id)
         {
             return _articleRepository.GetAsync(comment => comment.Id == id) != null;

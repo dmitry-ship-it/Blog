@@ -14,6 +14,7 @@ using Microsoft.IdentityModel.Tokens;
 using System;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Blog
 {
@@ -94,7 +95,7 @@ namespace Blog
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider serviceProvider)
         {
-            #region Default configuration (error page, static files, https)
+            #region Default configuration (error page, static files, https, status code pages)
 
             if (env.IsDevelopment())
             {
@@ -107,6 +108,23 @@ namespace Blog
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+
+            app.UseStatusCodePages(context =>
+            {
+                var response = context.HttpContext.Response;
+
+                switch (response.StatusCode)
+                {
+                    case 404:
+                        response.Redirect("/Error");
+                        break;
+                    case 401:
+                        response.Redirect("/User/Login");
+                        break;
+                }
+
+                return Task.CompletedTask;
+            });
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
