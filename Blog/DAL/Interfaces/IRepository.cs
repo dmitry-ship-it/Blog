@@ -13,10 +13,8 @@ namespace Blog.DAL.Interfaces
 
         Task InsertAsync(T obj);
 
-        void Update(T obj);
+        Task Update(T obj);
 
         Task DeleteAsync(int id);
-
-        Task SaveAsync();
     }
 }

@@ -22,14 +22,9 @@ namespace Blog.DAL.Repositories
 
         public abstract Task InsertAsync(T obj);
 
-        public abstract void Update(T obj);
+        public abstract Task Update(T obj);
 
         public abstract Task DeleteAsync(int id);
-
-        public async Task SaveAsync()
-        {
-            await _context.SaveChangesAsync();
-        }
 
         private bool _disposed = false;
 

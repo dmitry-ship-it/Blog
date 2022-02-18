@@ -1,6 +1,5 @@
 ﻿using Blog.Data;
 using Blog.Data.DbModels;
-using Blog.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -28,11 +27,13 @@ namespace Blog.DAL.Repositories
         public override async Task InsertAsync(Article article)
         {
             await _context.Articles.AddAsync(article);
+            await _context.SaveChangesAsync();
         }
 
-        public override void Update(Article article)
+        public override async Task Update(Article article)
         {
             _context.Articles.Update(article);
+            await _context.SaveChangesAsync();
         }
 
         public override async Task DeleteAsync(int id)
@@ -45,6 +46,8 @@ namespace Blog.DAL.Repositories
             {
                 _context.Comments.Remove(comment);
             }
+
+            await _context.SaveChangesAsync();
         }
     }
 }

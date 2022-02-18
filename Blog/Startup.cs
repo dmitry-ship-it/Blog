@@ -2,7 +2,6 @@ using Blog.DAL.Repositories;
 using Blog.Data;
 using Blog.Data.DbModels;
 using Blog.Data.Validation;
-using Blog.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -30,12 +29,16 @@ namespace Blog
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            #region Database configuration (incl. connection string)
+
             var dbPath = Directory.GetCurrentDirectory();
 
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection")
                         .Replace("[DataDirectory]", dbPath)));
+
+            #endregion
 
             #region Repositories
 
@@ -50,13 +53,17 @@ namespace Blog
 
             #endregion
 
+            #region Add controllers views and razor pages
+
             services.AddControllersWithViews();
             services.AddRazorPages();
+
+            #endregion
 
             #region JWToken
 
             SiteKeys.Configure(Configuration.GetSection("AppSettings"));
-            var key = Encoding.ASCII.GetBytes(SiteKeys.Token);
+            var key = Encoding.UTF8.GetBytes(SiteKeys.Token);
 
             services.AddSession(options => options.IdleTimeout = TimeSpan.FromMinutes(60));
             services.AddAuthentication(auth =>
@@ -87,6 +94,8 @@ namespace Blog
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider serviceProvider)
         {
+            #region Default configuration (error page, static files, https)
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -103,6 +112,8 @@ namespace Blog
             app.UseStaticFiles();
 
             app.UseRouting();
+
+            #endregion
 
             #region JWToken
 
@@ -124,6 +135,8 @@ namespace Blog
 
             #endregion
 
+            #region Endpoints
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
@@ -132,7 +145,9 @@ namespace Blog
                 endpoints.MapRazorPages();
             });
 
-            // Add default roles and default admin
+            #endregion
+
+            // Add default admin
             // for application testing
             AddDefaultUser(serviceProvider);
         }
@@ -149,13 +164,12 @@ namespace Blog
             var testUser = userRepository.GetAsync(user => user.Username == username);
             testUser.Wait();
 
-            // if there no user with specified userName  
+            // if there no user with specified username  
             if (testUser.Result is null)
             {
                 var defaultAdmin = UserProtector.CreateUser(username, password, Role.Admin);
 
                 userRepository.InsertAsync(defaultAdmin).Wait();
-                userRepository.SaveAsync().Wait();
             }
         }
     }

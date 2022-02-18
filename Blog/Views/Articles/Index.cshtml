@@ -7,28 +7,28 @@
 
 <div class="h1 mb-4">Articles</div>
 
-@foreach (var item in Model)
+@foreach (var article in Model)
 {
     <div class="card mb-5">
-        <div class="card-header h5">@item.Title</div>
+        <div class="card-header h5">@article.Title</div>
         <div class="card-body">
             <div class="card-text">
-                @foreach (var paragraph in item.Text.Split(Environment.NewLine))
+                @foreach (var paragraph in article.Text.Split(Environment.NewLine))
                 {
                     @paragraph
                     <br />
                 }
             </div>
             <div class="card-text text-right" style="color: gray">
-                @item.Date by @item.Username
+                @article.Date by @article.Username
             </div>
 
             <div class="card-text">
-                <a asp-action="Details" asp-route-id="@item.Id" class="btn m-1">@item.Comments.Count() comments</a>
-                @if (User.IsInRole(nameof(Role.Admin)) || User.Identity.Name == item.Username)
+                <a asp-action="Details" asp-route-id="@article.Id" class="btn m-1">@article.Comments.Count() comments</a>
+                @if (User.IsInRole(nameof(Role.Admin)) || User.Identity.Name == article.Username)
                 {
-                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-secondary m-1">Edit</a>
-                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger m-1">Delete</a>
+                    <a asp-action="Edit" asp-route-id="@article.Id" class="btn btn-secondary m-1">Edit</a>
+                    <a asp-action="Delete" asp-route-id="@article.Id" class="btn btn-danger m-1">Delete</a>
                 }
             </div>
         </div>

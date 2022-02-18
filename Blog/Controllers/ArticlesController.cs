@@ -1,13 +1,13 @@
-﻿using System.Threading.Tasks;
+﻿using Blog.DAL.Repositories;
+using Blog.Data.DbModels;
+using Blog.Data.Validation;
+using Blog.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Blog.Models;
 using Microsoft.Extensions.Logging;
-using Blog.DAL.Repositories;
-using Microsoft.AspNetCore.Authorization;
-using Blog.Data.DbModels;
 using System.Linq;
-using Blog.Data.Validation;
+using System.Threading.Tasks;
 
 namespace Blog.Controllers
 {
@@ -76,7 +76,6 @@ namespace Blog.Controllers
                 Date = model.Date,
                 Username = model.Username
             });
-            await _articleRepository.SaveAsync();
 
             _logger.LogInformation($"New article is created by {model.Username}.");
 
@@ -134,8 +133,7 @@ namespace Blog.Controllers
                     Username = model.Username,
                     Comments = model.Comments.Select(item => (Comment)item).ToList()
                 };
-                _articleRepository.Update(article);
-                await _articleRepository.SaveAsync();
+                await _articleRepository.Update(article);
             }
             catch (DbUpdateConcurrencyException) when (!ArticleExists(id))
             {
@@ -181,7 +179,6 @@ namespace Blog.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             await _articleRepository.DeleteAsync(id);
-            await _articleRepository.SaveAsync();
 
             _logger.LogInformation($"Article (id = {id}) deleted.");
 
@@ -204,7 +201,6 @@ namespace Blog.Controllers
                     ArticleId = model.ArticleId,
                     OutsideCommentId = model.OutsideCommentId
                 });
-                await _commentRepository.SaveAsync();
 
                 _logger.LogInformation($"New comment added by {model.Username} to article id = {model.ArticleId}.");
             }
@@ -230,7 +226,6 @@ namespace Blog.Controllers
             }
 
             await RemoveCommentAndRepliesRecursive(comment);
-            await _commentRepository.SaveAsync();
 
             _logger.LogInformation($"Comment (id = {comment.Id}) and its replies deleted.");
 

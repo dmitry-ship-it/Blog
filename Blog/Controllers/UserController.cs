@@ -86,7 +86,6 @@ namespace Blog.Controllers
 
             var newUser = UserProtector.CreateUser(model.Username, model.Password, Role.User);
             await _userRepository.InsertAsync(newUser);
-            await _userRepository.SaveAsync();
 
             _logger.LogInformation($"User '{model.Username}' registered successfully.");
 

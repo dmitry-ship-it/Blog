@@ -37,11 +37,14 @@ namespace Blog.DAL.Repositories
             {
                 throw new ArgumentException($"User {user.Username} already exists.", nameof(user));
             }
+
+            await _context.SaveChangesAsync();
         }
 
-        public override void Update(User user)
+        public override async Task Update(User user)
         {
             _context.Users.Update(user);
+            await _context.SaveChangesAsync();
         }
 
         public override async Task DeleteAsync(int id)
@@ -49,6 +52,8 @@ namespace Blog.DAL.Repositories
             var user = await _context.Users.FindAsync(id);
 
             _context.Users.Remove(user);
+
+            await _context.SaveChangesAsync();
         }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using Blog.Data.DbModels;
-using Blog.Models;
 using System;
 using System.Security.Cryptography;
 using System.Text;
@@ -14,7 +13,7 @@ namespace Blog.Data.Validation
         /// <param name="username"></param>
         /// <param name="password"></param>
         /// <param name="role"></param>
-        /// <returns>User with filled Username, PasswordHash, Role and Salt</returns>
+        /// <returns>User instance with filled Username, PasswordHash, Role and Salt</returns>
         public static User CreateUser(string username, string password, Role role)
         {
             // generate random salt
