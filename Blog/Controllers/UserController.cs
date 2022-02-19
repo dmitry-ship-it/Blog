@@ -45,7 +45,7 @@ namespace Blog.Controllers
 
             if (userSearchResult is null)
             {
-                return View();
+                return NotFound();
             }
 
             // check user password

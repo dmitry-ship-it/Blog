@@ -2,7 +2,6 @@ using Blog.DAL.Repositories;
 using Blog.Data;
 using Blog.Data.DbModels;
 using Blog.Data.Validation;
-using Blog.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -113,17 +112,7 @@ namespace Blog
             app.UseStatusCodePages(context =>
             {
                 var response = context.HttpContext.Response;
-
-                switch (response.StatusCode)
-                {
-                    case 404:
-                        response.Redirect("/Error");
-                        break;
-                    case 401:
-                        response.Redirect("/User/Login");
-                        break;
-                }
-
+                response.Redirect($"/Error/{response.StatusCode}");
                 return Task.CompletedTask;
             });
 
@@ -176,7 +165,7 @@ namespace Blog
             var userRepository = serviceProvider.GetRequiredService<Repository<User>>();
 
             // Add default admin
-            // to the Administrator role
+            // to the 'Admin' role
             const string username = "John_Doe";
             const string password = "_AStrongP@ssword1!";
 
