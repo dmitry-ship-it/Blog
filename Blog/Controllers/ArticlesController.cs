@@ -135,7 +135,7 @@ namespace Blog.Controllers
                     Username = model.Username,
                     Comments = model.Comments.Select(item => (Comment)item).ToList()
                 };
-                await _articleRepository.Update(article);
+                await _articleRepository.UpdateAsync(article);
             }
             catch (DbUpdateConcurrencyException) when (!ArticleExists(id))
             {
@@ -237,7 +237,7 @@ namespace Blog.Controllers
         [NonAction]
         private async Task RemoveCommentAndRepliesRecursive(Comment comment)
         {
-            if (comment.Replies.Count != 0)
+            if (comment.Replies?.Count != 0)
             {
                 foreach (var reply in comment.Replies)
                 {

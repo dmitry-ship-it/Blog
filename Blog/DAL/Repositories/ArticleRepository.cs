@@ -30,7 +30,7 @@ namespace Blog.DAL.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public override async Task Update(Article article)
+        public override async Task UpdateAsync(Article article)
         {
             _context.Articles.Update(article);
             await _context.SaveChangesAsync();

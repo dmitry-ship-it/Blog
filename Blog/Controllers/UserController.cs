@@ -79,12 +79,13 @@ namespace Blog.Controllers
         {
             var userSearchResult = await _userRepository.GetAsync(user => user.Username == model.Username);
 
+            // if user already exists
             if (userSearchResult != null)
             {
-                return View();
+                return BadRequest();
             }
 
-            var newUser = UserProtector.CreateUser(model.Username, model.Password, Role.User);
+            var newUser = UserProtector.CreateUser(model.Username, model.Password);
             await _userRepository.InsertAsync(newUser);
 
             _logger.LogInformation($"User '{model.Username}' registered successfully.");

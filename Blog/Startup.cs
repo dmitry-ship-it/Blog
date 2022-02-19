@@ -2,6 +2,7 @@ using Blog.DAL.Repositories;
 using Blog.Data;
 using Blog.Data.DbModels;
 using Blog.Data.Validation;
+using Blog.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;

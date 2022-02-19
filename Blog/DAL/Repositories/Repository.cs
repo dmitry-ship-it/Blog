@@ -22,7 +22,7 @@ namespace Blog.DAL.Repositories
 
         public abstract Task InsertAsync(T obj);
 
-        public abstract Task Update(T obj);
+        public abstract Task UpdateAsync(T obj);
 
         public abstract Task DeleteAsync(int id);
 
