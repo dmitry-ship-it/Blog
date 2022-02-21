@@ -24,11 +24,15 @@ namespace Blog.Controllers
 
         private readonly ILogger<ArticlesController> _logger;
 
+        private readonly UserManager _userManager;
+
         public UserController(ILogger<ArticlesController> logger,
-            Repository<User> userRepository)
+            Repository<User> userRepository,
+            UserManager userManager)
         {
             _logger = logger;
             _userRepository = userRepository;
+            _userManager = userManager;
         }
 
         // GET: /User/Login
@@ -49,12 +53,13 @@ namespace Blog.Controllers
             }
 
             // check user password
-            if (!UserProtector.CheckCredentials(userSearchResult, model.Password))
+            if (!_userManager.CheckCredentials(userSearchResult, model.Password))
             {
                 return View();
             }
 
-            CreateAuthenticationTicket(userSearchResult);
+            _userManager.CreateAuthenticationTicket(userSearchResult, HttpContext.Session);
+
             _logger.LogInformation($"User '{model.Username}' logged in.");
 
             return RedirectToAction("Index", "Home");
@@ -82,49 +87,22 @@ namespace Blog.Controllers
             // if user already exists
             if (userSearchResult != null)
             {
-                return BadRequest();
+                ModelState.TryAddModelError(string.Empty, "User with this username already exists.");
+                return View();
             }
 
-            var newUser = UserProtector.CreateUser(model.Username, model.Password);
+            var newUser = _userManager.CreateUser(model.Username, model.Password);
             await _userRepository.InsertAsync(newUser);
 
             _logger.LogInformation($"User '{model.Username}' registered successfully.");
 
-            return RedirectToAction("Index", "Home");
+            return RedirectToActionPermanent(nameof(Created));
         }
 
-        private void CreateAuthenticationTicket(User user)
+        // GET: /User/Created
+        public IActionResult Created()
         {
-            var key = Encoding.ASCII.GetBytes(SiteKeys.Token);
-            var JWToken = new JwtSecurityToken(
-                issuer: SiteKeys.WebSiteDomain,
-                audience: SiteKeys.WebSiteDomain,
-                claims: GetUserClaims(user),
-                notBefore: new DateTimeOffset(DateTime.Now).DateTime,
-                expires: new DateTimeOffset(DateTime.Now.AddDays(1)).DateTime,
-                signingCredentials: new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature));
-
-            var token = new JwtSecurityTokenHandler().WriteToken(JWToken);
-            HttpContext.Session.SetString("JWToken", token);
-        }
-
-        private IEnumerable<Claim> GetUserClaims(User user)
-        {
-            var claims = new List<Claim>();
-            var claim = new Claim(ClaimTypes.Name, user.Username);
-            claims.Add(claim);
-
-            claim = new Claim(ClaimTypes.Role, user.Role.ToString());
-            claims.Add(claim);
-
-            // if user has a specific role
-            // add default 'User'
-            if (user.Role != Role.User)
-            {
-                claims.Add(new Claim(ClaimTypes.Role, nameof(Role.User)));
-            }
-
-            return claims;
+            return View();
         }
     }
 }

@@ -30,6 +30,7 @@ namespace Blog.Data.DbModels
 
         public int? OutsideCommentId { get; set; }
 
+        // View model to database model converter
         public static explicit operator Comment(CommentViewModel commentViewModel)
         {
             return new Comment()
@@ -45,4 +46,3 @@ namespace Blog.Data.DbModels
         }
     }
 }
-

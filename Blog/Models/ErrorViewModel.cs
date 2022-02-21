@@ -12,13 +12,13 @@ namespace Blog.Models
 
         public string Message => StatusCode switch
         {
-            StatusCodes.Status400BadRequest => "Bad request",
+            StatusCodes.Status400BadRequest => "Bad Request",
             StatusCodes.Status401Unauthorized => "Unauthorized",
             StatusCodes.Status403Forbidden => "Forbidden",
-            StatusCodes.Status404NotFound => "Not found",
-            StatusCodes.Status408RequestTimeout => "Request timedout",
+            StatusCodes.Status404NotFound => "Not Found",
+            StatusCodes.Status408RequestTimeout => "Request Timed Out",
             // Add more if needed
-            _ => "Unknown error"
+            _ => "Unknown Error"
         };
     }
 }

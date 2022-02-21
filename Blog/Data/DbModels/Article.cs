@@ -28,6 +28,7 @@ namespace Blog.Data.DbModels
         [ForeignKey("ArticleId")]
         public virtual ICollection<Comment> Comments { get; set; }
 
+        // View model to database model converter
         public static explicit operator Article(ArticleViewModel articleViewModel)
         {
             return new Article()

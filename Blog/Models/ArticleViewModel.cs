@@ -28,6 +28,7 @@ namespace Blog.Models
 
         public ICollection<CommentViewModel> Comments { get; set; }
 
+        // Database model to view model converter
         public static explicit operator ArticleViewModel(Article article)
         {
             return new ArticleViewModel

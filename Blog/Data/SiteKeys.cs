@@ -12,6 +12,7 @@ namespace Blog.Data
         }
 
         public static string WebSiteDomain => _configuration["WebSiteDomain"];
+
         public static string Token => _configuration["Secret"];
     }
 }

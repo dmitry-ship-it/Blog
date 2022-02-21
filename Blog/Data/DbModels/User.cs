@@ -1,6 +1,4 @@
-﻿using Blog.Data.Validation;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Blog.Data.DbModels
 {
@@ -27,5 +25,6 @@ namespace Blog.Data.DbModels
     {
         User,
         Admin
+        // Place for additional roles
     }
 }

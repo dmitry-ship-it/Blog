@@ -52,6 +52,8 @@ namespace Blog
             services.AddScoped<Repository<User>, UserRepository>(x =>
                 new UserRepository(x.GetRequiredService<ApplicationDbContext>()));
 
+            services.AddScoped<UserManager>();
+
             #endregion
 
             #region Add controllers views and razor pages
@@ -163,6 +165,7 @@ namespace Blog
         private void AddDefaultUser(IServiceProvider serviceProvider)
         {
             var userRepository = serviceProvider.GetRequiredService<Repository<User>>();
+            var userManager = serviceProvider.GetRequiredService<UserManager>();
 
             // Add default admin
             // to the 'Admin' role
@@ -175,7 +178,7 @@ namespace Blog
             // if there no user with specified username  
             if (testUser.Result is null)
             {
-                var defaultAdmin = UserProtector.CreateUser(username, password, Role.Admin);
+                var defaultAdmin = userManager.CreateUser(username, password, Role.Admin);
 
                 userRepository.InsertAsync(defaultAdmin).Wait();
             }
