@@ -134,6 +134,7 @@ namespace Blog.Controllers
                     Username = model.Username,
                     Comments = model.Comments.Select(item => (Comment)item).ToList()
                 };
+
                 await _articleRepository.UpdateAsync(article);
             }
             catch (DbUpdateConcurrencyException) when (!ArticleExists(id))
@@ -207,6 +208,7 @@ namespace Blog.Controllers
             }
             else
             {
+                ModelState.TryAddModelError(string.Empty, "Error on adding comment.");
                 _logger.LogWarning("An error occurred while adding a comment (model state is invalid).");
             }
 
@@ -226,25 +228,11 @@ namespace Blog.Controllers
                 return NotFound();
             }
 
-            await RemoveCommentAndRepliesRecursive(comment);
+            await _commentRepository.DeleteAsync(comment.Id);
 
             _logger.LogInformation($"Comment (id = {comment.Id}) and its replies deleted.");
 
             return RedirectToAction("Details", new { id = comment.ArticleId });
-        }
-
-        [NonAction]
-        private async Task RemoveCommentAndRepliesRecursive(Comment comment)
-        {
-            if (comment.Replies?.Count != 0)
-            {
-                foreach (var reply in comment.Replies)
-                {
-                    await RemoveCommentAndRepliesRecursive(reply);
-                }
-            }
-
-            await _commentRepository.DeleteAsync(comment.Id);
         }
 
         [NonAction]

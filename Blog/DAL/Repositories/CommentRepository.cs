@@ -40,9 +40,22 @@ namespace Blog.DAL.Repositories
         {
             var comment = await _context.Comments.FindAsync(id);
 
-            _context.Comments.Remove(comment);
+            await RemoveCommentAndRepliesRecursive(comment);
 
             await _context.SaveChangesAsync();
+        }
+
+        private async Task RemoveCommentAndRepliesRecursive(Comment comment)
+        {
+            if (comment.Replies?.Count != 0)
+            {
+                foreach (var reply in comment.Replies)
+                {
+                    await RemoveCommentAndRepliesRecursive(reply);
+                }
+            }
+
+            _context.Remove(comment);
         }
     }
 }

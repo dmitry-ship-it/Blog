@@ -1,5 +1,4 @@
 ﻿using Blog.DAL.Repositories;
-using Blog.Data;
 using Blog.Data.DbModels;
 using Blog.Data.Validation;
 using Blog.Models;
@@ -7,12 +6,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Blog.Controllers
@@ -47,14 +40,11 @@ namespace Blog.Controllers
         {
             var userSearchResult = await _userRepository.GetAsync(user => user.Username == model.Username);
 
-            if (userSearchResult is null)
-            {
-                return NotFound();
-            }
-
             // check user password
-            if (!_userManager.CheckCredentials(userSearchResult, model.Password))
+            if (userSearchResult is null
+                || !_userManager.CheckCredentials(userSearchResult, model.Password))
             {
+                ModelState.AddModelError(string.Empty, "Username or password is invalid.");
                 return View();
             }
 
@@ -62,14 +52,14 @@ namespace Blog.Controllers
 
             _logger.LogInformation($"User '{model.Username}' logged in.");
 
-            return RedirectToAction("Index", "Home");
+            return RedirectPermanent("/");
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Logout()
         {
             HttpContext.Session.Clear();
-            return RedirectToAction("Index", "Home");
+            return RedirectPermanent("/");
         }
 
         // GET: /User/Register
@@ -82,6 +72,12 @@ namespace Blog.Controllers
         [HttpPost, ActionName("Register")]
         public async Task<IActionResult> RegisterConfirmed(RegisterModel model)
         {
+            if (model.Username == model.Password)
+            {
+                ModelState.AddModelError(string.Empty, "You cannot use your username as password.");
+                return View();
+            }
+
             var userSearchResult = await _userRepository.GetAsync(user => user.Username == model.Username);
 
             // if user already exists
