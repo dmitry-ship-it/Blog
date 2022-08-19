@@ -9,7 +9,8 @@ namespace Blog.Controllers
     {
         private readonly ILogger<ErrorController> _logger;
 
-        public ErrorController(ILogger<ErrorController> logger)        {
+        public ErrorController(ILogger<ErrorController> logger)
+        {
             _logger = logger;
         }
 
@@ -30,10 +31,10 @@ namespace Blog.Controllers
         {
             if (!code.HasValue || code < 400)
             {
-                return Redirect("/Error");
+                return RedirectToAction(nameof(Index));
             }
 
-            _logger.LogWarning($"Error {code} occurred.");
+            _logger.LogWarning("Error {ErrorCode} occurred.", code);
 
             return View(new ErrorViewModel()
             {

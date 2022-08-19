@@ -11,6 +11,9 @@ using System.Text;
 
 namespace Blog.Data.Validation
 {
+    /// <summary>
+    /// Class for creating and validating users.
+    /// </summary>
     public class UserManager
     {
         /// <summary>
@@ -20,11 +23,11 @@ namespace Blog.Data.Validation
         /// <param name="username"></param>
         /// <param name="password"></param>
         /// <param name="role"></param>
-        /// <returns>User instance with filled Username, PasswordHash, Role and Salt (in base64 form)</returns>
+        /// <returns>User instance with filled Username, PasswordHash, Role and Salt (in base64 form).</returns>
         public User CreateUser(string username, string password, Role role = Role.User)
         {
-            // generate random salt
-            var salt = new byte[128 / 8];
+            // generate random salt (128 bit)
+            var salt = new byte[16];
 
             using var rng = new RNGCryptoServiceProvider();
             rng.GetBytes(salt);
@@ -87,8 +90,8 @@ namespace Blog.Data.Validation
                 password: password,
                 salt: salt,
                 prf: KeyDerivationPrf.HMACSHA256,
-                iterationCount: 100000, // in 2022 better use >310000 iterations
-                numBytesRequested: 256 / 8));
+                iterationCount: 100_000, // in 2022 better to use >310_000 iterations
+                numBytesRequested: 32)); // 256 bit
         }
     }
 }

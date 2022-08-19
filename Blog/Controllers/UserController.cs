@@ -15,17 +15,17 @@ namespace Blog.Controllers
     {
         private readonly Repository<User> _userRepository;
 
-        private readonly ILogger<ArticlesController> _logger;
-
         private readonly UserManager _userManager;
 
-        public UserController(ILogger<ArticlesController> logger,
-            Repository<User> userRepository,
-            UserManager userManager)
+        private readonly ILogger<UserController> _logger;
+
+        public UserController(Repository<User> userRepository,
+            UserManager userManager,
+            ILogger<UserController> logger)
         {
-            _logger = logger;
             _userRepository = userRepository;
             _userManager = userManager;
+            _logger = logger;
         }
 
         // GET: /User/Login
@@ -50,15 +50,21 @@ namespace Blog.Controllers
 
             _userManager.CreateAuthenticationTicket(userSearchResult, HttpContext.Session);
 
-            _logger.LogInformation($"User '{model.Username}' logged in.");
+            _logger.LogInformation("User '{Username}' logged in.", model.Username);
 
             return RedirectPermanent("/");
         }
 
+        // Clear session
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Logout()
         {
+            var username = HttpContext.User.Identity.Name;
+
             HttpContext.Session.Clear();
+
+            _logger.LogInformation("User '{Username}' logged out.", username);
+
             return RedirectPermanent("/");
         }
 
@@ -90,7 +96,7 @@ namespace Blog.Controllers
             var newUser = _userManager.CreateUser(model.Username, model.Password);
             await _userRepository.InsertAsync(newUser);
 
-            _logger.LogInformation($"User '{model.Username}' registered successfully.");
+            _logger.LogInformation("User '{Username}' registered successfully.", model.Username);
 
             return RedirectToActionPermanent(nameof(Created));
         }

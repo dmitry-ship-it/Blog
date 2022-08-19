@@ -21,13 +21,13 @@ namespace Blog.Controllers
 
         private readonly ILogger<ArticlesController> _logger;
 
-        public ArticlesController(ILogger<ArticlesController> logger,
-            Repository<Article> articleRepository,
-            Repository<Comment> commentRepository)
+        public ArticlesController(Repository<Article> articleRepository,
+            Repository<Comment> commentRepository,
+            ILogger<ArticlesController> logger)
         {
-            _logger = logger;
             _articleRepository = articleRepository;
             _commentRepository = commentRepository;
+            _logger = logger;
         }
 
         // GET: Articles
@@ -64,8 +64,6 @@ namespace Blog.Controllers
         }
 
         // POST: Articles/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
-        // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [RequireAuthorization]
         public async Task<IActionResult> Create(CreateArticleModel model)
@@ -78,7 +76,7 @@ namespace Blog.Controllers
                 Username = model.Username
             });
 
-            _logger.LogInformation($"New article is created by {model.Username}.");
+            _logger.LogInformation("New article is created by {Username}.", model.Username);
 
             return RedirectToAction(nameof(Index));
         }
@@ -116,8 +114,6 @@ namespace Blog.Controllers
         }
 
         // POST: Articles/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
-        // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [RequireAuthorization]
         [ValidateAntiForgeryToken]
@@ -139,12 +135,12 @@ namespace Blog.Controllers
             }
             catch (DbUpdateConcurrencyException) when (!ArticleExists(id))
             {
-                _logger.LogWarning($"Article (id = {id}) is not changed (not found).");
+                _logger.LogWarning("Article (id = {Id}) is not changed (not found).", id);
 
                 return NotFound();
             }
 
-            _logger.LogInformation($"Article (id = {id}) is changed.");
+            _logger.LogInformation("Article (id = {Id}) is changed.", id);
 
             return RedirectToAction(nameof(Index));
         }
@@ -182,7 +178,7 @@ namespace Blog.Controllers
         {
             await _articleRepository.DeleteAsync(id);
 
-            _logger.LogInformation($"Article (id = {id}) deleted.");
+            _logger.LogInformation("Article (id = {Id}) deleted.", id);
 
             return RedirectToAction(nameof(Index));
         }
@@ -204,7 +200,8 @@ namespace Blog.Controllers
                     OutsideCommentId = model.OutsideCommentId
                 });
 
-                _logger.LogInformation($"New comment added by {model.Username} to article id = {model.ArticleId}.");
+                _logger.LogInformation("New comment added by {Username} to article id = {ArticleId}.",
+                    model.Username, model.ArticleId);
             }
             else
             {
@@ -230,7 +227,8 @@ namespace Blog.Controllers
 
             await _commentRepository.DeleteAsync(comment.Id);
 
-            _logger.LogInformation($"Comment (id = {comment.Id}) and its replies deleted.");
+            _logger.LogInformation("Comment (id = {Id}) and its replies deleted by {Username}.",
+                comment.Id, HttpContext.User.Identity.Name);
 
             return RedirectToAction("Details", new { id = comment.ArticleId });
         }

@@ -43,14 +43,11 @@ namespace Blog
 
             #region Repositories
 
-            services.AddScoped<Repository<Article>, ArticleRepository>(x =>
-                new ArticleRepository(x.GetRequiredService<ApplicationDbContext>()));
+            services.AddScoped<Repository<Article>, ArticleRepository>();
 
-            services.AddScoped<Repository<Comment>, CommentRepository>(x =>
-                new CommentRepository(x.GetRequiredService<ApplicationDbContext>()));
+            services.AddScoped<Repository<Comment>, CommentRepository>();
 
-            services.AddScoped<Repository<User>, UserRepository>(x =>
-                new UserRepository(x.GetRequiredService<ApplicationDbContext>()));
+            services.AddScoped<Repository<User>, UserRepository>();
 
             services.AddScoped<UserManager>();
 
